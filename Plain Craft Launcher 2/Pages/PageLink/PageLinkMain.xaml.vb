@@ -583,12 +583,16 @@ Public Class PageLinkMain
             Dim ModuleUrl As String = If(ModuleEntry IsNot Nothing,
                 If(ModuleEntry("url")?.ToString(), "").Trim, "")
             Dim UrlList As New List(Of String)
-            If ModuleUrl.Length > 0 Then
-                UrlList.Add(ModuleUrl)
-            Else
-                UrlList.AddRange(ServerConfig("Link")("Downloads").Select(
-                    Function(UrlEntry) UrlEntry.ToString.Replace("{arch}", Architecture)))
-            End If
+            If ModuleUrl.Length > 0 Then UrlList.Add(ModuleUrl)
+            '内置地址始终作为兜底：我们自己的镜像挂了就自动退回官方源，反之亦然。
+            '两个域名不同，属于真正的冗余，不是同源重复。
+            For Each UrlEntry In ServerConfig("Link")("Downloads")
+                Dim FallbackUrl As String = UrlEntry.ToString().Replace("{arch}", Architecture).Trim
+                If FallbackUrl.Length > 0 AndAlso
+                   Not UrlList.Any(Function(U) U.Equals(FallbackUrl, StringComparison.OrdinalIgnoreCase)) Then
+                    UrlList.Add(FallbackUrl)
+                End If
+            Next
             RequiredFiles.Add(New NetFile(
                 UrlList,
                 PathEasyTier & "EasyTier.zip",
@@ -613,9 +617,11 @@ Public Class PageLinkMain
             End Select
             '期望哈希：签名清单优先，其次编译期内置常量
             Dim ExpectedSha As String = ""
+            Dim HasManifestHash As Boolean = False
             Dim HashEntry As JObject = LinkModuleEntry(ZipArch)
             If HashEntry IsNot Nothing Then
                 ExpectedSha = If(HashEntry("sha256")?.ToString(), "").Trim().ToLower()
+                HasManifestHash = ExpectedSha.Length > 0
             End If
             If ExpectedSha = "" Then ExpectedSha = ExpectedEasytierZipSha256(ZipArch)
             If ExpectedSha = "" Then
@@ -624,7 +630,10 @@ Public Class PageLinkMain
             Else
                 '先比大小：下载被截断时报「不完整」而不是「被篡改」，
                 '否则用户会以为是网络被劫持，实际只是下载中断。
-                Dim ExpectedSize As Integer = ExpectedEasytierZipSize(ZipArch)
+                '只在用编译期内置常量时才比：内置大小只对应内置的那一个版本，
+                '服务端升级 EasyTier 后大小会变，而清单里的 sha256 才是权威依据。
+                Dim ExpectedSize As Integer = 0
+                If Not HasManifestHash Then ExpectedSize = ExpectedEasytierZipSize(ZipArch)
                 Dim ActualSize As Long = New IO.FileInfo(PathEasyTier & "EasyTier.zip").Length
                 If ExpectedSize > 0 AndAlso ActualSize <> ExpectedSize Then
                     Logger.Error($"联机模块大小不符：期望 {ExpectedSize}，实际 {ActualSize}")
