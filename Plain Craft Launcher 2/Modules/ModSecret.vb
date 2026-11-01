@@ -19,6 +19,11 @@ Friend Module ModSecret
     ''' CurseForge API 代理前缀（形如 host/cf），由 OtaBase 推导，
     ''' 这样换域名或换 CDN 时两处一起变。
     ''' </summary>
+    ''' <summary>更新日志页地址（由服务端根据发布记录自动生成）。</summary>
+    Friend Function OtaChangelogUrl() As String
+        Return OtaBase.TrimEnd("/"c) & "/changelog"
+    End Function
+
     Friend Function CurseForgeProxyHost() As String
         Dim B As String = OtaBase.TrimEnd("/"c)
         Dim Idx As Integer = B.IndexOf("://", StringComparison.Ordinal)
@@ -395,8 +400,8 @@ Friend Module ModSecret
                         Logger.Warn("OTA 未提供 sha256，已跳过校验")
                     End If
 
-                    '把这次更新的日志存下来，重启后由「已更新至」弹窗读取。
-                    '开源版的 FeatureList 是编译期硬编码且为空，不存下来就永远显示「没有更新日志……」。
+                    '把这次更新的日志存下来，重启后由「已更新至」弹窗原样展示。
+                    '本修改版的弹窗只认 OTA 下发的 changelog，不再拼接上游原版的 FeatureList。
                     Try
                         FileUtils.Write(PathTemp & "UpdateChangelog.txt", Changelog, Encoding.UTF8)
                     Catch ex As Exception
