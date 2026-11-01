@@ -9,9 +9,15 @@ Public Class PageLinkMain
     'EasyTier 联机模块压缩包的 SHA256（按架构）。
     '这个包从 GitHub 下载、解压后以管理员权限运行，不校验哈希等于把
     '「远程代码执行」交给任何能拦截该下载的人（恶意根证书、被控 CDN 等）。
-    '升级 EasyTier 版本时必须同步更新这里的哈希。
+    '⚠️ 取值只能用 GitHub Releases API 的 assets[].digest（权威值）。
+    '   千万不要「下载一份然后算哈希」——网络不稳时会拿到截断文件，
+    '   算出来的哈希是错的，会把正常用户全部拦下（这个坑已经踩过一次：
+    '   当时是在 7.9 MB 的截断包上算的，真实大小 32.6 MB）。
+    '   API: https://api.github.com/repos/EasyTier/EasyTier/releases/tags/v2.6.4
     Private Const EasytierZipSha256X64 As String =
-        "cd43d90b28b68b3518f5c5e694f47201dffde76264ee1e0fbeb85ab64c2c4972"
+        "27af91e270e554709b048bd32327fefd2dfce5062ae1e8701af7550c6f525f84"
+    '官方大小：哈希比对前先比大小，把「下载不完整」和「被篡改」区分开
+    Private Const EasytierZipSizeX64 As Integer = 32657720
 
     ''' <summary>返回当前架构对应的联机模块哈希，未知架构返回空字符串。</summary>
     Private Shared Function ExpectedEasytierZipSha256(Arch As String) As String
@@ -19,6 +25,12 @@ Public Class PageLinkMain
             Case "x86_64" : Return EasytierZipSha256X64
             Case Else : Return ""
         End Select
+    End Function
+
+    ''' <summary>官方压缩包大小；未知架构返回 0。</summary>
+    Private Shared Function ExpectedEasytierZipSize(Arch As String) As Integer
+        If Arch = "x86_64" Then Return EasytierZipSizeX64
+        Return 0
     End Function
 
     Private Const INVITE_CODE_VERSION As Integer = 3
@@ -610,6 +622,19 @@ Public Class PageLinkMain
                 Logger.Warn($"当前架构 {ZipArch} 没有预置联机模块哈希，跳过校验（存在被篡改风险）")
                 Hint("联机模块未做哈希校验，请确认网络环境可信", HintType.Red, False)
             Else
+                '先比大小：下载被截断时报「不完整」而不是「被篡改」，
+                '否则用户会以为是网络被劫持，实际只是下载中断。
+                Dim ExpectedSize As Integer = ExpectedEasytierZipSize(ZipArch)
+                Dim ActualSize As Long = New IO.FileInfo(PathEasyTier & "EasyTier.zip").Length
+                If ExpectedSize > 0 AndAlso ActualSize <> ExpectedSize Then
+                    Logger.Error($"联机模块大小不符：期望 {ExpectedSize}，实际 {ActualSize}")
+                    FileUtils.Delete(PathEasyTier & "EasyTier.zip")
+                    Settings.Set("LinkEasyTierVersion", -1)
+                    Panic("联机模块下载不完整",
+                        $"下载到的联机模块只有 {ActualSize:N0} 字节，应为 {ExpectedSize:N0} 字节。{vbCrLf}{vbCrLf}" &
+                        $"已删除该文件，请重试；网络不稳定时可以多试几次。")
+                    Return
+                End If
                 Dim ActualSha As String = CryptographyUtils.ComputeFileHash(
                     PathEasyTier & "EasyTier.zip", CryptographyUtils.HashMethod.Sha256).Trim().ToLower()
                 If ActualSha <> ExpectedSha Then
