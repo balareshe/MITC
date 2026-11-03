@@ -1,12 +1,90 @@
-﻿<local:MyPageRight x:Class="PageOtherTest"
+<local:MyPageRight x:Class="PageOtherTest"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:PCL"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     PanScroll="PanBack">
     <local:MyScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
-        <TextBlock Text="为便于维护，开源内容中不包含百宝箱功能……" HorizontalAlignment="Center" FontSize="15" Height="30" VerticalAlignment="Center" />
+        <StackPanel Margin="0,0,0,20">
+
+            <!-- 百宝箱 -->
+            <local:MyCard Title="百宝箱" Margin="0,15,0,0">
+                <Grid Margin="20,40,20,18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" /><ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" /><ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" /><ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <local:MyButton x:Name="BtnJrrp" Grid.Column="0" Text="今日人品" MinHeight="44"
+                                    HorizontalAlignment="Stretch" ColorType="Highlight" />
+                    <local:MyButton x:Name="BtnMemory" Grid.Column="2" Text="内存优化" MinHeight="44"
+                                    HorizontalAlignment="Stretch" />
+                    <local:MyButton x:Name="BtnRubbish" Grid.Column="4" Text="清理游戏垃圾" MinHeight="44"
+                                    HorizontalAlignment="Stretch" />
+                    <local:MyButton x:Name="BtnDontClick" Grid.Column="6" Text="千万别点" MinHeight="44"
+                                    HorizontalAlignment="Stretch" ColorType="Red" />
+                </Grid>
+            </local:MyCard>
+
+            <!-- 回声洞 -->
+            <local:MyCard Title="回声洞" Margin="0,15,0,0">
+                <StackPanel Margin="20,40,20,18">
+                    <TextBlock TextWrapping="Wrap" LineHeight="21" Opacity="0.75" Margin="0,0,0,10"
+                               Text="反复点击可以查看这里留下的乱七八糟的留言。" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="LabCave" Grid.Column="0" TextWrapping="Wrap" LineHeight="22"
+                                   VerticalAlignment="Center" Opacity="0.85" />
+                        <local:MyButton x:Name="BtnCave" Grid.Column="1" Text="换一条" MinWidth="96"
+                                        Margin="16,0,0,0" VerticalAlignment="Center" />
+                    </Grid>
+                </StackPanel>
+            </local:MyCard>
+
+            <!-- 下载自定义文件 -->
+            <local:MyCard Title="下载自定义文件" Margin="0,15,0,0">
+                <StackPanel Margin="20,40,20,18">
+                    <TextBlock TextWrapping="Wrap" LineHeight="21" Opacity="0.75"
+                               Text="使用启动器自己的下载引擎下载任意文件。部分站点（例如网盘）会拒绝非浏览器请求并返回 403，这类地址无法下载。" />
+                    <Grid Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="下载地址" Width="92" VerticalAlignment="Center" />
+                        <local:MyTextBox x:Name="TextUrl" Grid.Column="1" MaxHeight="30"
+                                         HintText="https://example.com/file.zip" />
+                    </Grid>
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="保存到" Width="92" VerticalAlignment="Center" />
+                        <local:MyTextBox x:Name="TextFolder" Grid.Column="1" MaxHeight="30" />
+                        <local:MyButton x:Name="BtnPickFolder" Grid.Column="2" Text="选择" MinWidth="80"
+                                        Margin="10,0,0,0" MaxHeight="30" />
+                    </Grid>
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="文件名" Width="92" VerticalAlignment="Center" />
+                        <local:MyTextBox x:Name="TextFileName" Grid.Column="1" MaxHeight="30"
+                                         HintText="留空则使用网址里的文件名" />
+                    </Grid>
+                    <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
+                        <local:MyButton x:Name="BtnDownload" Text="开始下载" MinWidth="140" ColorType="Highlight"
+                                        Padding="13,0" Margin="0,0,12,0" />
+                        <local:MyButton x:Name="BtnOpenFolder" Text="打开文件夹" MinWidth="140" Padding="13,0" />
+                    </StackPanel>
+                </StackPanel>
+            </local:MyCard>
+
+        </StackPanel>
     </local:MyScrollViewer>
 </local:MyPageRight>
