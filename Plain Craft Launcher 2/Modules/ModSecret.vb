@@ -1132,6 +1132,16 @@ Friend Module ModSecret
             Logger.Warn(ex, "读取本地授权码失败")
         End Try
 
+        '存量旧码（PCL- 前缀、或用户手抄时小写/漏短横）统一成 MITC- 形式并回写
+        If Key <> "" Then
+            Dim Norm As String = NormalizeLicenseKey(Key)
+            If Norm <> Key AndAlso Norm.StartsWith("MITC-") Then
+                Logger.Info("授权码已统一为新前缀格式")
+                Settings.Set("SystemLicenseKey", Norm)
+                Key = Norm
+            End If
+        End If
+
         '有授权码就立刻放行：联网校验放到后台，启动不再等待网络（原来要等约 0.8 秒）
         '校验明确失败时置 LicenseInvalid，在「启动游戏」「联机」时再拦。
         If Key <> "" Then
@@ -1142,6 +1152,32 @@ Friend Module ModSecret
 
         '没有授权码：仍然要求当场输入
         Return ShowLicenseDialog(Key)
+    End Function
+
+    ''' <summary>
+    ''' 把授权码的各种写法（小写、空格、无短横）统一成 MITC-XXXX-XXXX-XXXX-XXXX。
+    ''' 服务端只接受 MITC 前缀；这里顺带把改名前的 PCL- 老码在本机转成 MITC-，
+    ''' 这样已激活的用户不用重新输入。识别不出 16 位正文就原样返回，交给服务端判断。
+    ''' </summary>
+    Friend Function NormalizeLicenseKey(Key As String) As String
+        Try
+            Dim Raw As String = If(Key, "").ToUpperInvariant()
+            Dim Clean As String = New String(Raw.Where(Function(c) Char.IsLetterOrDigit(c)).ToArray())
+            For Each Prefix As String In {"MITC", "PCL"}
+                If Clean.StartsWith(Prefix) Then
+                    Clean = Clean.Substring(Prefix.Length)
+                    Exit For
+                End If
+            Next
+            If Clean.Length <> 16 Then Return If(Key, "").Trim()
+            Dim Parts(3) As String
+            For i = 0 To 3
+                Parts(i) = Clean.Substring(i * 4, 4)
+            Next
+            Return "MITC-" & String.Join("-", Parts)
+        Catch
+            Return If(Key, "").Trim()
+        End Try
     End Function
 
     ''' <summary>后台校验一次授权，失败时把 LicenseInvalid 置位。</summary>
@@ -1255,7 +1291,8 @@ Friend Module ModSecret
 
             AddHandler BtnOk.Click,
                 Sub()
-                    Dim Key As String = Box.Text.Trim()
+                    Dim Key As String = NormalizeLicenseKey(Box.Text.Trim())
+                    Box.Text = Key
                     If Key = "" Then
                         Err.Text = "请先输入授权码"
                         Return
@@ -1311,7 +1348,7 @@ Friend Module ModSecret
         Catch ex As Exception
             Logger.Error(ex, "显示授权窗口失败，改用系统输入框")
             Try
-                Dim Typed As String = Microsoft.VisualBasic.InputBox("请输入授权码：", "MITC 授权验证", Initial)
+                Dim Typed As String = NormalizeLicenseKey(Microsoft.VisualBasic.InputBox("请输入授权码：", "MITC 授权验证", Initial))
                 If Typed Is Nothing OrElse Typed.Trim() = "" Then Return False
                 Dim Msg As String = ""
                 If LicenseVerify(Typed, Msg) = 1 Then

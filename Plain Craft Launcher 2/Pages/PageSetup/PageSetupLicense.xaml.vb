@@ -40,10 +40,11 @@ Public Class PageSetupLicense
                 TextLicenseState.Text = "已过期"
                 TextLicenseState.Foreground = New SolidColorBrush(Color.FromRgb(193, 43, 43))
             Else
-                '脱敏显示：保留 PCL 前缀与末 4 位
+                '脱敏显示：保留前缀字母段与末 4 位
                 Dim Plain As String = Key.Replace("-", "")
                 If Plain.Length >= 12 Then
-                    Dim Head As String = If(Plain.StartsWith("MITC"), "MITC", Plain.Substring(0, 4))
+                    Dim Head As String = If(Plain.StartsWith("MITC"), "MITC",
+                                            Plain.Substring(0, Math.Min(4, Plain.Length)))
                     TextLicenseKey.Text = Head & "-****-****-" & Plain.Substring(Plain.Length - 4)
                 Else
                     TextLicenseKey.Text = "********"
