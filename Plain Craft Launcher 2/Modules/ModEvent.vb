@@ -279,7 +279,7 @@ Public Class CustomEvent
                 Case EventType.下载文件
                     Args(0) = Args(0).Replace("\", "/")
                     If Not (Args(0).StartsWithF("http://", True) OrElse Args(0).StartsWithF("https://", True)) Then
-                        MyMsgBox("EventData 必须为以 http:// 或 https:// 开头的网址。" & vbCrLf & "PCL 不支持其他乱七八糟的下载协议。", "事件执行失败")
+                        MyMsgBox("EventData 必须为以 http:// 或 https:// 开头的网址。" & vbCrLf & "MITC 不支持其他乱七八糟的下载协议。", "事件执行失败")
                         Return
                     End If
                     If Not EventSafetyConfirm("即将从该网址下载文件：" & vbCrLf & Args(0)) Then Return
@@ -321,7 +321,7 @@ Public Class CustomEvent
                     End Sub)
 
                 Case Else
-                    MyMsgBox("未知的事件类型：" & Type & vbCrLf & "请检查事件类型填写是否正确，或者 PCL 是否为最新版本。", "事件执行失败")
+                    MyMsgBox("未知的事件类型：" & Type & vbCrLf & "请检查事件类型填写是否正确，或者 MITC 是否为最新版本。", "事件执行失败")
             End Select
         Catch ex As Exception
             Logger.Error(ex, $"事件执行失败（{Type}, {Arg}）", LogBehavior.Alert)
@@ -368,7 +368,7 @@ Public Class CustomEvent
         RelativeUrl = RelativeUrl.Replace("/", "\").Lower.TrimStart("\")
 
         '确认实际路径
-        Dim Location As String, WorkingDir As String = Paths.Base & "PCL"
+        Dim Location As String, WorkingDir As String = Paths.Base & "MITC"
         HelpTryExtract()
         If RelativeUrl.Contains(":\") Then
             '绝对路径
@@ -377,17 +377,17 @@ Public Class CustomEvent
         ElseIf FileUtils.Exists(Paths.Base & "PCL\" & RelativeUrl) Then
             '相对 PCL 文件夹的路径
             Location = Paths.Base & "PCL\" & RelativeUrl
-            Logger.Info($"自定义事件中由相对 PCL 文件夹的路径{Type}：{Location}")
+            Logger.Info($"自定义事件中由相对 MITC 文件夹的路径{Type}：{Location}")
         ElseIf FileUtils.Exists(Paths.Base & "PCL\Help\" & RelativeUrl) Then
             '相对 PCL 本地帮助文件夹的路径
             Location = Paths.Base & "PCL\Help\" & RelativeUrl
             WorkingDir = Paths.Base & "PCL\Help\"
-            Logger.Info($"自定义事件中由相对 PCL 本地帮助文件夹的路径{Type}：{Location}")
+            Logger.Info($"自定义事件中由相对 MITC 本地帮助文件夹的路径{Type}：{Location}")
         ElseIf Type = EventType.打开帮助 AndAlso FileUtils.Exists(PathTemp & "Help\" & RelativeUrl) Then
             '相对 PCL 自带帮助文件夹的路径
             Location = PathTemp & "Help\" & RelativeUrl
             WorkingDir = PathTemp & "Help\"
-            Logger.Info($"自定义事件中由相对 PCL 自带帮助文件夹的路径{Type}：{Location}")
+            Logger.Info($"自定义事件中由相对 MITC 自带帮助文件夹的路径{Type}：{Location}")
         ElseIf Type = EventType.打开文件 OrElse Type = EventType.执行命令 Then
             '直接使用原有路径启动程序
             Location = RelativeUrl

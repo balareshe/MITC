@@ -62,7 +62,7 @@
                 PageInstanceLeft.Instance.DisplayType = ReadIni(PageInstanceLeft.Instance.PathVersion & "PCL\Setup.ini", "DisplayType", McInstanceCardType.Auto)
                 FrmInstanceLeft.RefreshModDisabled()
 
-                WriteIni(McFolderSelected & "PCL.ini", "InstanceCache", "") '要求刷新缓存
+                WriteIni(McFolderSelected & "MITC.ini", "InstanceCache", "") '要求刷新缓存
                 LoaderFolderRun(McInstanceListLoader, McFolderSelected, LoaderFolderRunType.ForceRun, MaxDepth:=1, ExtraPath:="versions\")
             Catch ex As Exception
                 Logger.Error(ex, $"修改版本分类失败（{PageInstanceLeft.Instance.Name}）")
@@ -72,14 +72,14 @@
             '改为隐藏
             Try
                 If Not Settings.Get(Of Boolean)("HintHide") Then
-                    If MyMsgBox("确认要从版本列表中隐藏该版本吗？隐藏该版本后，它将不再出现于 PCL 显示的版本列表中。" & vbCrLf & "此后，在版本列表页面按下 F11 才可以查看被隐藏的版本。", "隐藏版本提示",, "取消") <> 1 Then
+                    If MyMsgBox("确认要从版本列表中隐藏该版本吗？隐藏该版本后，它将不再出现于 MITC 显示的版本列表中。" & vbCrLf & "此后，在版本列表页面按下 F11 才可以查看被隐藏的版本。", "隐藏版本提示",, "取消") <> 1 Then
                         ComboDisplayType.SelectedIndex = 0
                         Return
                     End If
                     Settings.Set("HintHide", True)
                 End If
                 WriteIni(PageInstanceLeft.Instance.PathVersion & "PCL\Setup.ini", "DisplayType", McInstanceCardType.Hidden)
-                WriteIni(McFolderSelected & "PCL.ini", "InstanceCache", "") '要求刷新缓存
+                WriteIni(McFolderSelected & "MITC.ini", "InstanceCache", "") '要求刷新缓存
                 LoaderFolderRun(McInstanceListLoader, McFolderSelected, LoaderFolderRunType.ForceRun, MaxDepth:=1, ExtraPath:="versions\")
             Catch ex As Exception
                 Logger.Error(ex, $"隐藏版本 {PageInstanceLeft.Instance.Name} 失败")
@@ -91,7 +91,7 @@
     Private Sub BtnDisplayDesc_Click(sender As Object, e As EventArgs) Handles BtnDisplayDesc.Click
         Try
             Dim OldInfo As String = ReadIni(PageInstanceLeft.Instance.PathVersion & "PCL\Setup.ini", "CustomInfo")
-            Dim NewInfo As String = MyMsgBoxInput("更改描述", "修改版本的描述文本，留空则使用 PCL 的默认描述。", OldInfo, New ObjectModel.Collection(Of Validate), "默认描述")
+            Dim NewInfo As String = MyMsgBoxInput("更改描述", "修改版本的描述文本，留空则使用 MITC 的默认描述。", OldInfo, New ObjectModel.Collection(Of Validate), "默认描述")
             If NewInfo IsNot Nothing AndAlso OldInfo <> NewInfo Then WriteIni(PageInstanceLeft.Instance.PathVersion & "PCL\Setup.ini", "CustomInfo", NewInfo)
             PageInstanceLeft.Instance = New McInstance(PageInstanceLeft.Instance.Name).Load()
             Reload()
@@ -134,8 +134,8 @@
                 FileUtils.Write(NewPath & "PCL\Setup.ini", FileUtils.ReadAsString(NewPath & "PCL\Setup.ini").Replace(OldPath, NewPath))
             End If
             '更改已选中的版本
-            If ReadIni(McFolderSelected & "PCL.ini", "Version") = OldName Then
-                WriteIni(McFolderSelected & "PCL.ini", "Version", NewName)
+            If ReadIni(McFolderSelected & "MITC.ini", "Version") = OldName Then
+                WriteIni(McFolderSelected & "MITC.ini", "Version", NewName)
             End If
             '更新版本 Json
             Try
@@ -148,7 +148,7 @@
             '刷新与提示
             Hint("重命名成功！", HintType.Green)
             PageInstanceLeft.Instance = New McInstance(NewName).Load()
-            If Not IsNothing(McInstanceSelected) AndAlso McInstanceSelected.Equals(PageInstanceLeft.Instance) Then WriteIni(McFolderSelected & "PCL.ini", "Version", NewName)
+            If Not IsNothing(McInstanceSelected) AndAlso McInstanceSelected.Equals(PageInstanceLeft.Instance) Then WriteIni(McFolderSelected & "MITC.ini", "Version", NewName)
             Reload()
             LoaderFolderRun(McInstanceListLoader, McFolderSelected, LoaderFolderRunType.ForceRun, MaxDepth:=1, ExtraPath:="versions\")
         Catch ex As Exception
@@ -180,7 +180,7 @@
             WriteIni(PageInstanceLeft.Instance.PathVersion & "PCL\Setup.ini", "Logo", NewLogo)
             WriteIni(PageInstanceLeft.Instance.PathVersion & "PCL\Setup.ini", "LogoCustom", Not NewLogo = "")
             '刷新显示
-            WriteIni(McFolderSelected & "PCL.ini", "InstanceCache", "") '要求刷新缓存
+            WriteIni(McFolderSelected & "MITC.ini", "InstanceCache", "") '要求刷新缓存
             PageInstanceLeft.Instance = New McInstance(PageInstanceLeft.Instance.Name).Load()
             Reload()
             LoaderFolderRun(McInstanceListLoader, McFolderSelected, LoaderFolderRunType.ForceRun, MaxDepth:=1, ExtraPath:="versions\")

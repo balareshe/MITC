@@ -71,7 +71,7 @@
                     End If
                 Next
             Catch ex As Exception
-                Logger.Warn(ex, "扫描 PCL 所在文件夹中是否有 MC 文件夹失败")
+                Logger.Warn(ex, "扫描 MITC 所在文件夹中是否有 MC 文件夹失败")
             End Try
 
             '扫描官启文件夹
@@ -149,15 +149,15 @@
             Dim ResultJson As String =
 "{
     ""profiles"":  {
-        ""PCL"": {
+        ""MITC"": {
             ""icon"": ""Grass"",
-            ""name"": ""PCL"",
+            ""name"": ""MITC"",
             ""lastVersionId"": ""latest-release"",
             ""type"": ""latest-release"",
             ""lastUsed"": """ & Date.Now.ToString("yyyy'-'MM'-'dd") & "T" & Date.Now.ToString("HH':'mm':'ss") & ".0000Z""
         }
     },
-    ""selectedProfile"": ""PCL"",
+    ""selectedProfile"": ""MITC"",
     ""clientToken"": ""23323323323323323323323323323333""
 }"
             FileUtils.Write(Folder & "launcher_profiles.json", ResultJson, encoding:=Encoding.GetEncoding("GB18030"))
@@ -186,7 +186,7 @@
             _McInstanceSelectedLast = value
             '更新 MC 文件夹所选取的 Minecraft 版本
             Logger.Info($"当前选择的 Minecraft 版本：{If(value?.PathVersion, "无")}")
-            WriteIni(McFolderSelected & "PCL.ini", "Version", If(value?.Name, ""))
+            WriteIni(McFolderSelected & "MITC.ini", "Version", If(value?.Name, ""))
             If value Is Nothing Then Return
             '重置缓存的下载文件夹
             PageDownloadResourceDetail.CachedFolder.Clear()
@@ -432,7 +432,7 @@
                     End If
                     '无法获取
                     _Version.VanillaName = "Unknown"
-                    Info = "PCL 无法识别该版本的 MC 版本号"
+                    Info = "MITC 无法识别该版本的 MC 版本号"
                 Catch ex As Exception
                     Logger.Warn(ex, "识别 Minecraft 版本时出错")
                     _Version.VanillaName = "Unknown"
@@ -1283,12 +1283,12 @@ ExitDataLoad:
             End If
             '不可用
             If Not FolderList.Any() Then
-                WriteIni(PathMc & "PCL.ini", "InstanceCache", "") '清空缓存
+                WriteIni(PathMc & "MITC.ini", "InstanceCache", "") '清空缓存
                 GoTo OnLoaded
             End If
             '有可用版本
             Dim FolderListCheck As Integer = (Versions.McInstanceCacheVersion & "#" & FolderList.Join("#"c)).GetStableHashCode() Mod (Integer.MaxValue - 1) '根据文件夹名列表生成辨识码
-            If Not McInstanceListForceRefresh AndAlso Val(ReadIni(PathMc & "PCL.ini", "InstanceCache")) = FolderListCheck Then
+            If Not McInstanceListForceRefresh AndAlso Val(ReadIni(PathMc & "MITC.ini", "InstanceCache")) = FolderListCheck Then
                 '可以使用缓存
                 Dim Result = InitMcInstanceListWithCache(PathMc)
                 If Result Is Nothing Then
@@ -1301,7 +1301,7 @@ ExitDataLoad:
 Reload:
                 McInstanceListForceRefresh = False
                 Logger.Info("文件夹列表变更，重载所有版本")
-                WriteIni(PathMc & "PCL.ini", "InstanceCache", FolderListCheck)
+                WriteIni(PathMc & "MITC.ini", "InstanceCache", FolderListCheck)
                 McInstanceList = InitMcInstanceListWithoutCache(PathMc)
             End If
             IsFirstMcInstanceListLoad = False
@@ -1311,7 +1311,7 @@ OnLoaded:
             If Loader.IsCanceled Then Return
             If McInstanceList.Any(Function(v) v.Key <> McInstanceCardType.Error) Then
                 '尝试读取已储存的选择
-                Dim SavedSelection As String = ReadIni(PathMc & "PCL.ini", "Version")
+                Dim SavedSelection As String = ReadIni(PathMc & "MITC.ini", "Version")
                 If SavedSelection <> "" Then
                     For Each Card As KeyValuePair(Of McInstanceCardType, List(Of McInstance)) In McInstanceList
                         For Each Instance As McInstance In Card.Value
@@ -1336,7 +1336,7 @@ OnLoaded:
             If Settings.Get(Of Boolean)("SystemDebugDelay") Then Thread.Sleep(RandomInteger(200, 3000))
         Catch ex As Exception
             If Loader.IsCanceled OrElse ex.IsCanceled Then Return '#5617
-            WriteIni(PathMc & "PCL.ini", "InstanceCache", "") '要求下次重新加载
+            WriteIni(PathMc & "MITC.ini", "InstanceCache", "") '要求下次重新加载
             Logger.Error(ex, "加载 .minecraft 版本列表失败")
         End Try
     End Sub
@@ -1345,14 +1345,14 @@ OnLoaded:
     Private Function InitMcInstanceListWithCache(Folder As String) As Dictionary(Of McInstanceCardType, List(Of McInstance))
         Dim Results As New Dictionary(Of McInstanceCardType, List(Of McInstance))
         Try
-            Dim CardCount As Integer = ReadIni(Folder & "PCL.ini", "CardCount", -1)
+            Dim CardCount As Integer = ReadIni(Folder & "MITC.ini", "CardCount", -1)
             If CardCount = -1 Then Return Nothing
             For i = 0 To CardCount - 1
-                Dim CardType As McInstanceCardType = ReadIni(Folder & "PCL.ini", "CardKey" & (i + 1), ":")
+                Dim CardType As McInstanceCardType = ReadIni(Folder & "MITC.ini", "CardKey" & (i + 1), ":")
                 Dim InstanceList As New List(Of McInstance)
 
                 '循环读取版本
-                For Each VersionName As String In ReadIni(Folder & "PCL.ini", "CardValue" & (i + 1), ":").Split(":")
+                For Each VersionName As String In ReadIni(Folder & "MITC.ini", "CardValue" & (i + 1), ":").Split(":")
                     If VersionName = "" Then Continue For
                     Dim FolderVersions As String = $"{Folder}versions\{VersionName}\"
                     If FileUtils.Exists(FolderVersions & ".pclignore") Then
@@ -1435,7 +1435,7 @@ OnLoaded:
                 Logger.Info($"跳过空文件夹：{VersionFolderInfo.FullName}")
                 Continue For
             End If
-            If (VersionFolderInfo.Name = "cache" OrElse VersionFolderInfo.Name = "BLClient" OrElse VersionFolderInfo.Name = "PCL") AndAlso
+            If (VersionFolderInfo.Name = "cache" OrElse VersionFolderInfo.Name = "BLClient" OrElse VersionFolderInfo.Name = "MITC") AndAlso
                 Not FileUtils.Exists(VersionFolderInfo.FullName & "\" & VersionFolderInfo.Name & ".json") Then
                 Logger.Info($"跳过可能不是版本文件夹的项目：{VersionFolderInfo.FullName}")
                 Continue For
@@ -1597,14 +1597,14 @@ OnLoaded:
 
 #End Region
 #Region "保存卡片缓存"
-        WriteIni(Folder & "PCL.ini", "CardCount", Results.Count)
+        WriteIni(Folder & "MITC.ini", "CardCount", Results.Count)
         For i = 0 To Results.Count - 1
-            WriteIni(Folder & "PCL.ini", "CardKey" & (i + 1), Results.Keys(i))
+            WriteIni(Folder & "MITC.ini", "CardKey" & (i + 1), Results.Keys(i))
             Dim Value As String = ""
             For Each Instance As McInstance In Results.Values(i)
                 Value += Instance.Name & ":"
             Next
-            WriteIni(Folder & "PCL.ini", "CardValue" & (i + 1), Value)
+            WriteIni(Folder & "MITC.ini", "CardValue" & (i + 1), Value)
         Next
 #End Region
         Return Results
@@ -1750,8 +1750,8 @@ OnLoaded:
         Dim FileAddress As String = PathTemp & "Cache\Skin\" & Address.GetStableHashCode() & ".png"
         SyncLock McSkinDownloadLock
             If Not FileUtils.Exists(FileAddress) Then
-                NetDownloadByClient(Address, FileAddress & ".PCLDownloading")
-                FileUtils.Move(FileAddress & ".PCLDownloading", FileAddress)
+                NetDownloadByClient(Address, FileAddress & ".MITCDownloading")
+                FileUtils.Move(FileAddress & ".MITCDownloading", FileAddress)
                 Logger.Info($"皮肤下载成功：{FileAddress}")
             End If
             Return FileAddress

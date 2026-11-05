@@ -107,7 +107,7 @@ Public Class PageLinkMain
                     $"联机功能需要管理员权限。{vbCrLf}{vbCrLf}" &
                     $"创建虚拟网卡、写入防火墙规则都必须提权，否则联机模块会直接崩溃。{vbCrLf}{vbCrLf}" &
                     $"点「继续」后，Windows 会弹出授权窗口，请选择「是」。" & vbCrLf &
-                    $"PCL 会自动以管理员权限重启，之后请重新点击「联机」。{vbCrLf}{vbCrLf}" &
+                    $"MITC 会自动以管理员权限重启，之后请重新点击「联机」。{vbCrLf}{vbCrLf}" &
                     $"如果不想授权，点「算了」即可，其它功能不受影响。",
                     "联机需要管理员权限", "继续", "算了", IsWarn:=True))
                 If Choice <> 1 Then
@@ -115,7 +115,7 @@ Public Class PageLinkMain
                     Return
                 End If
                 Try
-                    '必须带 --wait：否则新实例会认为"已有 PCL 在运行"并立刻退出，
+                    '必须带 --wait：否则新实例会认为"已有 MITC 在运行"并立刻退出，
                     '而旧实例同时也在退出，结果两个都没了。
                     Logger.Info("用户选择「继续」，正在以管理员身份重启（--wait）")
                     Diagnostics.Process.Start(New Diagnostics.ProcessStartInfo(PathExe) With {.Verb = "runas", .Arguments = "--wait"})
@@ -180,7 +180,7 @@ Public Class PageLinkMain
         '前缀 PCLB- 是给中继白名单认的：中继只给 PCLB-* 开头的网络转发，
         '别人随便起的名字用不了我们的中继。前缀用大写 P 开头，
         '这样过渡期旧的 P* 白名单也还能匹配。
-        NetworkName = $"PCLB-P{ServerPort.ConvertRadix(16).PadLeft(4, "0"c)}-{GenerateRandomCode()}"
+        NetworkName = $"MITCB-P{ServerPort.ConvertRadix(16).PadLeft(4, "0"c)}-{GenerateRandomCode()}"
         NetworkSecret = GenerateRandomCode()
         DiscoverNodeID = -1
         Logger.Info($"尝试创建房间，网络名 {NetworkName}，网络密码 {NetworkSecret}，端口 {ServerPort}")
@@ -234,21 +234,21 @@ Public Class PageLinkMain
         If Code Is Nothing Then Return "邀请码为空！"
         Code = FixCodeFormat(Code)
         '判断类型
-        If Not (Code.Length = CODE_TOTAL_LEN AndAlso Code.StartsWithF("PCLB-") AndAlso
+        If Not (Code.Length = CODE_TOTAL_LEN AndAlso Code.StartsWithF("MITCB-") AndAlso
                 Code(4) = "-"c AndAlso Code(10) = "-"c AndAlso Code(16) = "-"c AndAlso Code(22) = "-"c) Then
             If Code.StartsWithF("U/") Then 'HMCL
-                Return "请让房主使用 PCL 创建房间！"
+                Return "请让房主使用 MITC 创建房间！"
             ElseIf Code.Length = 10 Then 'PCL CE
-                Return "请让房主使用非社区版的 PCL 创建房间！"
+                Return "请让房主使用非社区版的 MITC 创建房间！"
             ElseIf Code.Length = 23 AndAlso Code(0) = "P"c AndAlso Code(11) = "-"c Then
                 '旧格式（没有 PCLB- 前缀）
-                Return "这是旧版邀请码。请双方都升级到最新版 PCL 后再联机——新版房间名带 PCLB- 前缀，中继只给这种房间转发。"
+                Return "这是旧版邀请码。请双方都升级到最新版 MITC 后再联机——新版房间名带 MITCB- 前缀，中继只给这种房间转发。"
             Else
-                Return "邀请码有误，请让房主使用 PCL 创建房间！"
+                Return "邀请码有误，请让房主使用 MITC 创建房间！"
             End If
         End If
         '校验版本
-        If Val(Code.Substring(23, 2)) > INVITE_CODE_VERSION Then Return "你的 PCL 版本太老了，请在更新 PCL 之后再联机！"
+        If Val(Code.Substring(23, 2)) > INVITE_CODE_VERSION Then Return "你的 MITC 版本太老了，请在更新 MITC 之后再联机！"
         Return Nothing
     End Function
     Private Shared Function FixCodeFormat(Code As String) As String
@@ -437,7 +437,7 @@ Public Class PageLinkMain
 
     '复制邀请码
     Private Sub Copy() Handles BtnFinishCopy.Click
-        Dim CodeText As String = $"在 PCL 启动器中输入邀请码【{GetInviteCode()}】，即可加入联机房间！"
+        Dim CodeText As String = $"在 MITC 启动器中输入邀请码【{GetInviteCode()}】，即可加入联机房间！"
         ClipboardSet(CodeText, False)
         Settings.Set("LinkLastAutoJoinInviteCode", CodeText)
         Hint("已复制邀请码！", HintType.Green)
@@ -531,7 +531,7 @@ Public Class PageLinkMain
             Throw New Exception(
                 $"$未授予管理员权限，无法启动联机模块。{vbCrLf}{vbCrLf}" &
                 $"重新进入「联机」页面并点「继续」，按提示授权即可。{vbCrLf}" &
-                $"也可以右键 PCL → 以管理员身份运行。" & vbCrLf &
+                $"也可以右键 MITC → 以管理员身份运行。" & vbCrLf &
                 $"或在 属性 → 兼容性 中勾选「以管理员身份运行此程序」，以后就不必每次授权。")
         End If
 
@@ -549,7 +549,7 @@ Public Class PageLinkMain
         If Not String.IsNullOrEmpty(DisableReason) Then Throw New Exception("$" & DisableReason) 'TODO: 可能不会显示错误原因？
         If CType(ServerConfig("Link"), JObject).ContainsKey("MinVersionCode") AndAlso
            VersionCode < ServerConfig("Link")("MinVersionCode").ToObject(Of Integer) Then
-            Throw New Exception("$你的 PCL 版本太老了，请在更新 PCL 之后再联机！")
+            Throw New Exception("$你的 MITC 版本太老了，请在更新 MITC 之后再联机！")
         End If
         '提前校验中继节点：避免用户先白等约 30 MB 的联机模块下载，
         '下载完才被告知必须去填节点地址。
@@ -1496,7 +1496,7 @@ ForcedPass:
             Try
                 Static BroadcastSocket As New Socket(SocketType.Dgram, ProtocolType.Udp)
                 BroadcastSocket.SendTo(
-                    Encoding.UTF8.GetBytes($"[MOTD]PCL 联机房间[/MOTD][AD]{ClientPort}[/AD]"),
+                    Encoding.UTF8.GetBytes($"[MOTD]MITC 联机房间[/MOTD][AD]{ClientPort}[/AD]"),
                     SocketFlags.None,
                     New IPEndPoint(IPAddress.Loopback, 4445))
             Catch ex As Exception

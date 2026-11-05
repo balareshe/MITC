@@ -5,15 +5,15 @@ Friend Module ModSecret
     '标注 PCL 的不同分支，仅用于替换标记
     Public Const VersionBranchMain As String = "OpenSource"
     '在开源版的注册表与常规版的注册表隔离，以防数据冲突
-    Public Const RegFolder As String = "PCLDebug"
+    Public Const RegFolder As String = "MITCDebug"
     '用于微软登录的 ClientId
     '本修改版自有的 Azure 应用（公开客户端，无 secret，Client ID 属公开信息）
     '环境变量 PCL_MS_CLIENT_ID 仍然优先，便于临时切换测试
-    Public OAuthClientId As String = If(Environment.GetEnvironmentVariable("PCL_MS_CLIENT_ID"), "504721c5-1f26-4d60-afa4-ae3f4b65be64")
+    Public OAuthClientId As String = If(Environment.GetEnvironmentVariable("MITC_MS_CLIENT_ID"), "504721c5-1f26-4d60-afa4-ae3f4b65be64")
     'CurseForge API Key
     '客户端默认不带任何 CurseForge 凭证：API 请求走服务端代理，key 只在服务器上。
     '只有在本地调试时用环境变量 PCL_CURSEFORGE_API_KEY 直连才会用到它。
-    Public CurseForgeAPIKey As String = If(Environment.GetEnvironmentVariable("PCL_CURSEFORGE_API_KEY"), "")
+    Public CurseForgeAPIKey As String = If(Environment.GetEnvironmentVariable("MITC_CURSEFORGE_API_KEY"), "")
 
     ''' <summary>
     ''' CurseForge API 代理前缀（形如 host/cf），由 OtaBase 推导，
@@ -121,9 +121,9 @@ Friend Module ModSecret
             If Url.Contains("baidupcs.com") OrElse Url.Contains("baidu.com") Then
                 Req.Headers.Add("User-Agent", "LogStatistic")  '#4951
             ElseIf SimulateBrowserHeaders Then
-                Req.Headers.Add("User-Agent", $"PCL2/{VersionBaseName}.{CInt(BuildType)} Mozilla/5.0 AppleWebKit/537.36 Chrome/63.0.3239.132 Safari/537.36")
+                Req.Headers.Add("User-Agent", $"MITC/{VersionBaseName}.{CInt(BuildType)} Mozilla/5.0 AppleWebKit/537.36 Chrome/63.0.3239.132 Safari/537.36")
             Else
-                Req.Headers.Add("User-Agent", $"PCL2/{VersionBaseName}.{CInt(BuildType)}")
+                Req.Headers.Add("User-Agent", $"MITC/{VersionBaseName}.{CInt(BuildType)}")
             End If
         End If
         If Not SimulateBrowserHeaders Then Req.Headers.Add("Referer", $"http://{VersionCode}.open.pcl2.server/")
@@ -435,7 +435,7 @@ Friend Module ModSecret
                 '兜底：清理上次更新可能残留的更新程序副本。
                 '延迟删除偶尔会失败（进程还没退出、文件被占用），这里收尾。
                 Try
-                    Dim Leftover As String = IO.Path.Combine(IO.Path.GetDirectoryName(PathExe), "PCL2_updater.exe")
+                    Dim Leftover As String = IO.Path.Combine(IO.Path.GetDirectoryName(PathExe), "MITC_updater.exe")
                     Dim SelfPath As String = Diagnostics.Process.GetCurrentProcess().MainModule.FileName
                     If FileUtils.Exists(Leftover) AndAlso Not String.Equals(Leftover, SelfPath, StringComparison.OrdinalIgnoreCase) Then
                         FileUtils.Delete(Leftover)
@@ -467,7 +467,7 @@ Friend Module ModSecret
             '杀软/系统策略拦住，放在目标目录里成功率更高。失败则退回临时目录。
             Dim UpdaterPath As String = Latest
             Try
-                Dim StagedUpdater As String = IO.Path.Combine(IO.Path.GetDirectoryName(PathExe), "PCL2_updater.exe")
+                Dim StagedUpdater As String = IO.Path.Combine(IO.Path.GetDirectoryName(PathExe), "MITC_updater.exe")
                 File.Copy(Latest, StagedUpdater, True)
                 UpdaterPath = StagedUpdater
             Catch ex As Exception
@@ -621,7 +621,7 @@ Friend Module ModSecret
             FileUtils.Delete(Latest)
             NetDownloadByLoader(Obj("url").ToString(), Latest, LoaderToSyncProgress)
         Catch ex As Exception
-            Logger.Error(ex, "下载最新版 PCL 失败")
+            Logger.Error(ex, "下载最新版 MITC 失败")
             Throw
         End Try
     End Sub
@@ -636,7 +636,7 @@ Friend Module ModSecret
     ''' </summary>
     Public ServerConfig As JObject
 
-    Public ServerLoader As New LoaderTask(Of Integer, Integer)("PCL 配置更新", Sub() RefreshServerConfig(), Priority:=ThreadPriority.BelowNormal) With {.ReloadTimeout = 1000 * 60 * 60}
+    Public ServerLoader As New LoaderTask(Of Integer, Integer)("MITC 配置更新", Sub() RefreshServerConfig(), Priority:=ThreadPriority.BelowNormal) With {.ReloadTimeout = 1000 * 60 * 60}
 
     ''' <summary>
     ''' 当前可用的内置节点（已过期的会被排除）。
@@ -1166,7 +1166,7 @@ Friend Module ModSecret
             Dim WA = SystemParameters.WorkArea
             Dim WinW As Double = 486, WinH As Double = 306
             Dim Win As New Window With {
-                .Title = "PCL 授权验证",
+                .Title = "MITC 授权验证",
                 .Width = WinW,
                 .Height = WinH,
                 .ResizeMode = ResizeMode.NoResize,
@@ -1282,7 +1282,7 @@ Friend Module ModSecret
         Catch ex As Exception
             Logger.Error(ex, "显示授权窗口失败，改用系统输入框")
             Try
-                Dim Typed As String = Microsoft.VisualBasic.InputBox("请输入授权码：", "PCL 授权验证", Initial)
+                Dim Typed As String = Microsoft.VisualBasic.InputBox("请输入授权码：", "MITC 授权验证", Initial)
                 If Typed Is Nothing OrElse Typed.Trim() = "" Then Return False
                 Dim Msg As String = ""
                 If LicenseVerify(Typed, Msg) = 1 Then

@@ -593,7 +593,7 @@ EndHint:
                             End Select
                         Next
                     End If
-                    Logger.Info($"已扫描 PCL 文件夹下的帮助文件，目前总计 {FileList.Count} 条")
+                    Logger.Info($"已扫描 MITC 文件夹下的帮助文件，目前总计 {FileList.Count} 条")
                     '读取自带文件
                     For Each File In DirectoryUtils.EnumerateFiles(PathTemp & "Help", True)
                         '跳过非 json 文件与以 . 开头的文件夹
@@ -919,7 +919,7 @@ NextFile:
             IsTaskTempClearing = True
             Try
                 Logger.Info("开始清理任务缓存文件夹")
-                DirectoryUtils.Delete($"{OsDrive}ProgramData\PCL\TaskTemp\")
+                DirectoryUtils.Delete($"{OsDrive}ProgramData\MITC\TaskTemp\")
                 DirectoryUtils.Delete($"{PathTemp}TaskTemp\")
                 Logger.Info("已清理任务缓存文件夹")
             Catch ex As Exception
@@ -952,7 +952,7 @@ NextFile:
         Catch
         End Try
         '使用备用路径
-        ResultFolder = $"{OsDrive}ProgramData\PCL\TaskTemp\{GetUuid()}-{RandomInteger(0, 1000000)}\"
+        ResultFolder = $"{OsDrive}ProgramData\MITC\TaskTemp\{GetUuid()}-{RandomInteger(0, 1000000)}\"
         DirectoryUtils.Create(ResultFolder)
         CheckPermission(ResultFolder)
         Return ResultFolder

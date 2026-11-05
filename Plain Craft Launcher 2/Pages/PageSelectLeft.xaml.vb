@@ -90,7 +90,7 @@
             '确认创建按钮状态
             If Not DirectoryUtils.Exists(Paths.Base & ".minecraft\") Then
                 Dim ItemCreate As New MyListItem With {.IsScaleAnimationEnabled = False, .Type = MyListItem.CheckType.Clickable, .Title = "新建 .minecraft 文件夹", .Height = 34,
-                    .ToolTip = "在 PCL 当前所在文件夹下创建新的 .minecraft 文件夹",
+                    .ToolTip = "在 MITC 当前所在文件夹下创建新的 .minecraft 文件夹",
                     .LogoScale = 0.9,
                     .Logo = "M103.331925 384.978025l25.805736 0L129.137661 161.847132c0-18.313088 14.905478-33.718963 33.718963-33.718963l0.969071 0 253.006318 0c10.82044 0 20.218484 4.797259 26.500561 12.257162l117.579929 126.753869 297.819966 0c18.297738 0 33.736359 15.179724 33.736359 33.977859l0 0.952698 0 82.909292 25.547863 0c18.538215 0 34.187637 15.179724 34.187637 33.977859 0 2.163269-0.469698 3.617387-0.469698 5.539156l-54.437843 432.971086c-1.210571 10.382465-7.007601 19.056008-14.968923 24.352641-6.249331 5.765307-14.680351 9.624195-23.595394 9.624195l-0.969071 0-694.906773 0c-9.155521 0-17.344017-3.858888-23.626094-9.155521-8.67252-5.765307-14.453177-14.939247-15.389502-25.758664L69.597613 423.040922c-2.165316-18.313088 10.868535-35.414581 29.665647-38.062897L103.331925 384.978025 103.331925 384.978025zM196.576609 384.978025 196.576609 384.978025l627.938546 0 0-49.625234L546.461371 335.352791l0 0c-9.400091 0-18.329461-4.117784-25.048489-11.110035L402.363486 196.067514 196.576609 196.067514 196.576609 384.978025 196.576609 384.978025zM879.469767 452.916347 879.469767 452.916347l-20.267603 0-0.469698 0-0.969071 0-694.906773 0-0.984421 0-20.218484 0 45.781696 366.728382 646.218888 0L879.469767 452.916347 879.469767 452.916347z"}
                 FrmSelectLeft.PanList.Children.Add(ItemCreate)
@@ -173,10 +173,10 @@
                 '检查文件夹权限
                 If Not CheckPermission(FolderPath) Then
                     If ShowHint Then
-                        Hint("添加文件夹失败：PCL 没有访问该文件夹的权限！", HintType.Red)
+                        Hint("添加文件夹失败：MITC 没有访问该文件夹的权限！", HintType.Red)
                         Return
                     Else
-                        Throw New Exception("PCL 没有访问文件夹的权限：" & FolderPath)
+                        Throw New Exception("MITC 没有访问文件夹的权限：" & FolderPath)
                     End If
                 End If
                 '检查实际的 Minecraft 文件夹位置（没有问题，或是在子文件夹中）
@@ -270,12 +270,12 @@
             Dim Target As McFolder = CType(CType(CType(sender.Parent, ContextMenu).Parent, Primitives.Popup).PlacementTarget, MyListItem).Tag
             '若为 “移除”，则提醒是否删除 PCL 的配置文件
             If Target.Type = McFolder.Types.Custom Then
-                Select Case MyMsgBox("是否需要清理 PCL 在该文件夹中的配置文件？" & vbCrLf & "这包括各个版本的独立设置（如自定义图标、第三方登录配置）等，对游戏本身没有影响。", "配置文件清理", "删除", "保留", "取消")
+                Select Case MyMsgBox("是否需要清理 MITC 在该文件夹中的配置文件？" & vbCrLf & "这包括各个版本的独立设置（如自定义图标、第三方登录配置）等，对游戏本身没有影响。", "配置文件清理", "删除", "保留", "取消")
                     Case 1
                         '删除配置文件
-                        FileUtils.Delete(Target.Location & "PCL.ini")
+                        FileUtils.Delete(Target.Location & "MITC.ini")
                         For Each Instance In DirectoryUtils.EnumerateDirectories(Target.Location & "versions\")
-                            DirectoryUtils.Delete(Path.Combine(Instance, "PCL"), True)
+                            DirectoryUtils.Delete(Path.Combine(Instance, "MITC"), True)
                         Next
                     Case 2
                         '不删除
@@ -348,7 +348,7 @@
         RefreshCurrent(McFolderSelected)
     End Sub
     Public Shared Sub RefreshCurrent(Folder As String)
-        WriteIni(Folder & "PCL.ini", "InstanceCache", "") '删除缓存以强制要求下一次加载时更新列表
+        WriteIni(Folder & "MITC.ini", "InstanceCache", "") '删除缓存以强制要求下一次加载时更新列表
         If Folder = McFolderSelected Then LoaderFolderRun(McInstanceListLoader, McFolderSelected, LoaderFolderRunType.ForceRun, MaxDepth:=1, ExtraPath:="versions\")
     End Sub
     Public Sub Rename_Click(sender As Object, e As RoutedEventArgs)

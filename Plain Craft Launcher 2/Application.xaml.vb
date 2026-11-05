@@ -8,7 +8,7 @@ Public Class Application
     Private Sub Application_Startup(sender As Object, e As StartupEventArgs) Handles Me.Startup
         Try
             '核心初始化
-            MeloongCore.Main.Init("PCL")
+            MeloongCore.Main.Init("MITC")
             MeloongCore.Wpf.Main.Init()
             Logger.Instance = New PclLogger With {.logFolder = Paths.BaseThenName, .MinLevel = If(ModeDebug, LogLevel.Trace, LogLevel.Info)}
             '提升主线程优先级
@@ -72,10 +72,10 @@ Public Class Application
                 DirectoryUtils.Create(Paths.Base & "PCL\Musics\")
                 CheckPermissionWithException(Paths.Base & "PCL\")
             Catch ex As Exception
-                MsgBox($"PCL 没有对当前文件夹的权限（{Paths.Base}PCL\），请尝试：" & vbCrLf &
-                  "1. 将 PCL 移动到其他文件夹" & If(Paths.Base.StartsWithF("C:", True), "，例如 C 盘和桌面以外的其他位置。", "。") & vbCrLf &
-                  "2. 删除当前目录中的 PCL 文件夹，然后再试。" & vbCrLf &
-                  "3. 右键 PCL 选择属性，打开 兼容性 中的 以管理员身份运行此程序。",
+                MsgBox($"MITC 没有对当前文件夹的权限（{Paths.Base}MITC\），请尝试：" & vbCrLf &
+                  "1. 将 MITC 移动到其他文件夹" & If(Paths.Base.StartsWithF("C:", True), "，例如 C 盘和桌面以外的其他位置。", "。") & vbCrLf &
+                  "2. 删除当前目录中的 MITC 文件夹，然后再试。" & vbCrLf &
+                  "3. 右键 MITC 选择属性，打开 兼容性 中的 以管理员身份运行此程序。",
                 MsgBoxStyle.Critical, "运行环境错误")
                 Environment.[Exit](ProcessReturnValues.Cancel)
             End Try
@@ -85,9 +85,9 @@ RetryCacheCheck:
                 CheckPermissionWithException(PathTemp)
             Catch ex As Exception
                 If PathTemp = Path.GetTempPath() & "PCL\" Then
-                    MyMsgBox("PCL 无法访问缓存文件夹，可能导致程序出错或无法正常使用！" & vbCrLf & vbCrLf & "错误原因：" & ex.GetDisplay(True), "缓存文件夹不可用")
+                    MyMsgBox("MITC 无法访问缓存文件夹，可能导致程序出错或无法正常使用！" & vbCrLf & vbCrLf & "错误原因：" & ex.GetDisplay(True), "缓存文件夹不可用")
                 Else
-                    MyMsgBox("手动设置的缓存文件夹不可用，PCL 将使用默认缓存文件夹。" & vbCrLf & vbCrLf & "错误原因：" & ex.GetDisplay(True), "缓存文件夹不可用")
+                    MyMsgBox("手动设置的缓存文件夹不可用，MITC 将使用默认缓存文件夹。" & vbCrLf & vbCrLf & "错误原因：" & ex.GetDisplay(True), "缓存文件夹不可用")
                     Settings.Set("SystemSystemCache", "")
                     PathTemp = Path.GetTempPath() & "PCL\"
                     GoTo RetryCacheCheck
@@ -95,6 +95,28 @@ RetryCacheCheck:
             End Try
             DirectoryUtils.Create(PathTemp & "Cache\")
             DirectoryUtils.Create(Paths.AppDataThenName)
+        '从旧名（PCL）迁移配置：只搬配置文件，联机模块让它按新名字重新下载，
+        '避免把被 WinDivert 锁住的旧目录整个复制过来。
+        Try
+            Dim OldDir As String = IO.Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PCL")
+            Dim NewCfg As String = IO.Path.Combine(Paths.AppDataThenName, "config.json")
+            If IO.Directory.Exists(OldDir) AndAlso Not IO.File.Exists(NewCfg) Then
+                Dim Moved As Integer = 0
+                For Each OldFile As String In IO.Directory.GetFiles(OldDir)
+                    Try
+                        IO.File.Copy(OldFile, IO.Path.Combine(
+                            Paths.AppDataThenName, IO.Path.GetFileName(OldFile)), True)
+                        Moved += 1
+                    Catch exx As Exception
+                        Logger.Warn(exx, $"迁移旧配置失败：{IO.Path.GetFileName(OldFile)}")
+                    End Try
+                Next
+                Logger.Info($"已从旧目录 {OldDir} 迁移 {Moved} 个配置文件")
+            End If
+        Catch ex As Exception
+            Logger.Warn(ex, "迁移旧配置目录失败")
+        End Try
             '要求单例
             WaitingMutex(e)
             '设置 ToolTipService 默认值
@@ -120,11 +142,11 @@ RetryCacheCheck:
             Logger.Info($"管理员权限：{WindowsUtils.HasAdminRole()}")
             '检测异常环境
             If Paths.Base.Contains(Path.GetTempPath()) OrElse Paths.Base.Contains("AppData\Local\Temp\") Then
-                MyMsgBox("请将 PCL 从压缩包中解压后再使用！" & vbCrLf & "如果不会解压，可以在网上寻找教程。", "需要解压！", "我知道了", IsWarn:=True, ForceWait:=True)
+                MyMsgBox("请将 MITC 从压缩包中解压后再使用！" & vbCrLf & "如果不会解压，可以在网上寻找教程。", "需要解压！", "我知道了", IsWarn:=True, ForceWait:=True)
                 FormMain.EndProgramForce(ProcessReturnValues.Cancel)
             End If
             If Not Environment.Is64BitOperatingSystem Then
-                MyMsgBox("PCL 和新版 Minecraft 均不再支持 32 位系统，请重装为 64 位系统后再进行游戏！", "环境警告", "我知道了", IsWarn:=True, ForceWait:=True)
+                MyMsgBox("MITC 和新版 Minecraft 均不再支持 32 位系统，请重装为 64 位系统后再进行游戏！", "环境警告", "我知道了", IsWarn:=True, ForceWait:=True)
                 FormMain.EndProgramForce(ProcessReturnValues.Cancel)
             End If
             '授权校验（必须早于启动动画：未授权就不播动画）
@@ -151,7 +173,7 @@ RetryCacheCheck:
                 FilePath = PathExe
             Catch
             End Try
-            MsgBox(ex.GetDisplay(True) & vbCrLf & "PCL 所在路径：" & If(String.IsNullOrEmpty(FilePath), "获取失败", FilePath), MsgBoxStyle.Critical, "PCL 初始化错误")
+            MsgBox(ex.GetDisplay(True) & vbCrLf & "MITC 所在路径：" & If(String.IsNullOrEmpty(FilePath), "获取失败", FilePath), MsgBoxStyle.Critical, "MITC 初始化错误")
             FormMain.EndProgramForce(ProcessReturnValues.Exception)
         End Try
     End Sub
@@ -163,9 +185,9 @@ RetryCacheCheck:
         If BuildType = BuildTypes.Debug Then Return
         Try
             Dim MutexCreatedNew As Boolean
-            PclMutex = New Mutex(True, "PCL_SingletonMutex", MutexCreatedNew)
+            PclMutex = New Mutex(True, "MITC_SingletonMutex", MutexCreatedNew)
             If MutexCreatedNew Then Return
-            Logger.Warn("已有一个 PCL 实例正在运行")
+            Logger.Warn("已有一个 MITC 实例正在运行")
             '等待已有的 PCL 退出
             If e.Args.Length > 0 AndAlso e.Args(0) = "--wait" Then
                 Try

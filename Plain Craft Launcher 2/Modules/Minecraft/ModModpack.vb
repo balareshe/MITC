@@ -75,7 +75,7 @@ Public Module ModModpack
                 If ex.GetDisplay(True).Contains("Error.WinIOError") Then
                     Throw New Exception("打开整合包文件失败", ex)
                 ElseIf File.EndsWithF(".rar", True) Then
-                    Throw New Exception("PCL 无法处理 rar 格式的压缩包，请在解压后重新压缩为 zip 格式再试", ex)
+                    Throw New Exception("MITC 无法处理 rar 格式的压缩包，请在解压后重新压缩为 zip 格式再试", ex)
                 Else
                     Throw New Exception("打开整合包文件失败，文件可能损坏或为不支持的压缩包格式", ex)
                 End If
@@ -148,8 +148,8 @@ Retry:
             Logger.Info($"整合包中没有覆写文件夹：{OverridesFolder}")
         End If
         '设置 ini
-        Dim OverridesIni As String = $"{OverridesFolder}PCL\Setup.ini"
-        Dim VersionIni As String = $"{VersionFolder}PCL\Setup.ini"
+        Dim OverridesIni As String = $"{OverridesFolder}MITC\Setup.ini"
+        Dim VersionIni As String = $"{VersionFolder}MITC\Setup.ini"
         If FileUtils.Exists(OverridesIni) Then
             WriteIni(OverridesIni, "VersionArgumentIndie", 1) '开启版本隔离
             WriteIni(OverridesIni, "VersionArgumentIndieV2", True)
@@ -586,7 +586,7 @@ Retry:
         If String.IsNullOrEmpty(InstanceName) Then Throw New OperationCanceledException
         '解压
         Dim InstallTemp As String = RequestTaskTempFolder()
-        Dim SetupFile As String = $"{McFolderSelected}versions\{InstanceName}\PCL\Setup.ini"
+        Dim SetupFile As String = $"{McFolderSelected}versions\{InstanceName}\MITC\Setup.ini"
         Dim InstallLoaders As New List(Of LoaderBase)
         InstallLoaders.Add(New LoaderTask(Of String, Integer)("解压整合包文件",
         Sub(Task As LoaderTask(Of String, Integer))
@@ -627,7 +627,7 @@ Retry:
                     If Logo <> "" AndAlso FileUtils.Exists($"{InstallTemp}{ArchiveBaseFolder}{Logo}.png") Then
                         WriteIni(SetupFile, "LogoCustom", True)
                         WriteIni(SetupFile, "Logo", "PCL\Logo.png")
-                        FileUtils.Copy($"{InstallTemp}{ArchiveBaseFolder}{Logo}.png", $"{McFolderSelected}versions\{InstanceName}\PCL\Logo.png")
+                        FileUtils.Copy($"{InstallTemp}{ArchiveBaseFolder}{Logo}.png", $"{McFolderSelected}versions\{InstanceName}\MITC\Logo.png")
                         Logger.Info($"迁移 MultiMC 版本独立设置：版本图标（{Logo}.png）")
                     End If
                     'JVM 参数
@@ -715,7 +715,7 @@ Retry:
         End If
         '解压
         Dim InstallTemp As String = RequestTaskTempFolder()
-        Dim SetupFile As String = $"{McFolderSelected}versions\{InstanceName}\PCL\Setup.ini"
+        Dim SetupFile As String = $"{McFolderSelected}versions\{InstanceName}\MITC\Setup.ini"
         Dim InstallLoaders As New List(Of LoaderBase)
         InstallLoaders.Add(New LoaderTask(Of String, Integer)("解压整合包文件",
         Sub(Task As LoaderTask(Of String, Integer))
@@ -738,7 +738,7 @@ Retry:
         Next
         If Not Addons.ContainsKey("game") Then Throw New Exception("该 MCBBS 整合包未提供游戏版本信息，无法安装！")
         If Addons.ContainsKey("quilt") Then
-            Hint("PCL 暂不支持安装需要 Quilt 的整合包！", HintType.Red)
+            Hint("MITC 暂不支持安装需要 Quilt 的整合包！", HintType.Red)
             Throw New OperationCanceledException
         End If
         Dim Request As New McInstallRequest With {
@@ -794,7 +794,7 @@ Retry:
                     Logger.Info($"文件 {ExeFile} 的产品名标识为 {Info.ProductName}")
                     If Info.ProductName = "Plain Craft Launcher" Then
                         Launcher = ExeFile
-                        Logger.Info($"发现整合包附带的 PCL 启动器：{ExeFile}")
+                        Logger.Info($"发现整合包附带的 MITC 启动器：{ExeFile}")
                     ElseIf (Info.ProductName.ContainsIgnoreCase("Launcher") OrElse Info.ProductName.Contains("启动")) AndAlso
                         Not Info.ProductName = "Plain Craft Launcher Admin Manager" Then
                         If Launcher Is Nothing Then

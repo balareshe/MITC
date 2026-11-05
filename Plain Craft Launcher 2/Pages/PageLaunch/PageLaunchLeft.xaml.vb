@@ -63,7 +63,7 @@ Public Class PageLaunchLeft
                 End Try
             End If
             '确认 Minecraft 版本存在
-            Dim Selection As String = ReadIni(McFolderSelected & "PCL.ini", "Version")
+            Dim Selection As String = ReadIni(McFolderSelected & "MITC.ini", "Version")
             Dim Instance As McInstance = If(Selection = "", Nothing, New McInstance(Selection))
             If Instance Is Nothing OrElse Not Instance.PathVersion.StartsWithF(McFolderSelected) OrElse Not Instance.Check() Then
                 '无效的版本
@@ -502,7 +502,7 @@ UseDefault:
                 End Try
             Case 4 '自定义
                 If Not FileUtils.Exists(Paths.AppDataThenName & "CustomSkin.png") Then
-                    Hint("未找到离线皮肤自定义文件，可能它已被删除。PCL 将使用默认的 Steve 皮肤！")
+                    Hint("未找到离线皮肤自定义文件，可能它已被删除。MITC 将使用默认的 Steve 皮肤！")
                     Settings.Set("LaunchSkinType", 1)
                     GoTo UseDefault
                 End If

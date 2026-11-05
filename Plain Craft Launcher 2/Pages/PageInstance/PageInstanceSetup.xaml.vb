@@ -327,7 +327,7 @@ PreFin:
     'TODO: 这会不会导致拖拽改变第三方登录的时候版本列表缓存没有更新？
     Public Shared Sub OnVersionServerLoginChanged(Type As Integer)
         If FrmInstanceSetup Is Nothing Then Return
-        WriteIni(McFolderSelected & "PCL.ini", "InstanceCache", "")
+        WriteIni(McFolderSelected & "MITC.ini", "InstanceCache", "")
         If PageInstanceLeft.Instance Is Nothing Then Return
         PageInstanceLeft.Instance = New McInstance(PageInstanceLeft.Instance.Name).Load()
         LoaderFolderRun(McInstanceListLoader, McFolderSelected, LoaderFolderRunType.ForceRun, MaxDepth:=1, ExtraPath:="versions\")
@@ -407,7 +407,7 @@ PreFin:
                     HintArgumentJava.Theme = MyHint.Themes.Blue
                 ElseIf JavaWorker.LastResult Is Nothing Then
                     If ComboArgumentJava.SelectedIndex = 0 Then
-                        HintArgumentJava.Text = $"你的电脑上没有可供该版本使用的 Java，PCL 会在启动游戏时自动下载。"
+                        HintArgumentJava.Text = $"你的电脑上没有可供该版本使用的 Java，MITC 会在启动游戏时自动下载。"
                         HintArgumentJava.Theme = MyHint.Themes.Yellow
                     Else
                         HintArgumentJava.Text = $"该版本的版本文件夹中没有发现任何 Java！{vbCrLf}请点击此处打开版本文件夹，然后将 Java 文件夹复制进去。"
@@ -439,7 +439,7 @@ PreFin:
                     HintArgumentJava.Text = $"正在查找 Java……"
                     HintArgumentJava.Theme = MyHint.Themes.Blue
                 ElseIf JavaWorker.LastResult Is Nothing Then
-                    HintArgumentJava.Text = $"你的电脑上没有任何 Java 符合该版本范围！{vbCrLf}如果 Mojang 提供了对应版本的 Java，PCL 会在启动游戏时自动下载。"
+                    HintArgumentJava.Text = $"你的电脑上没有任何 Java 符合该版本范围！{vbCrLf}如果 Mojang 提供了对应版本的 Java，MITC 会在启动游戏时自动下载。"
                     HintArgumentJava.Theme = MyHint.Themes.Yellow
                 Else
                     HintArgumentJava.Text = $"将会使用：{JavaWorker.LastResult}"

@@ -6,16 +6,16 @@ Public Module ModBase
 #Region "声明"
 
     '下列版本信息由更新器自动修改
-    Public Const VersionBaseName As String = "2.13.0.1.462" '显示用版本名：上游基线 + 本修改版构建号
+    Public Const VersionBaseName As String = "2.13.0.1.463" '显示用版本名：上游基线 + 本修改版构建号
     Public Const CommitHash As String = "" 'Commit Hash，由 GitHub Workflow 自动替换
     'VersionCode 跟随本修改版自己的发布节奏递增：
     '  每次发布 +1；新增功能或较大改动可 +2 ~ +5。
     '  VersionBaseName 是显示用版本名，形如 2.13.0.1.<versionCode>：
     '  前缀保留上游基线，后缀是本修改版自己的构建号，两者需同步修改。
 #If RELEASE Then
-    Public Const VersionCode As Integer = 462 '正式版
+    Public Const VersionCode As Integer = 463 '正式版
 #Else
-    Public Const VersionCode As Integer = 463 '快照版
+    Public Const VersionCode As Integer = 464 '快照版
 #End If
 
     '版本信息
@@ -527,7 +527,7 @@ Public Module ModBase
     ''' </summary>
     ''' <param name="FileName">文件完整路径或简写文件名。简写将会使用“ApplicationName\文件名.ini”作为路径。</param>
     Public Sub IniClearCache(FileName As String)
-        If Not FileName.Contains(":\") Then FileName = $"{Paths.Base}PCL\{FileName}.ini"
+        If Not FileName.Contains(":\") Then FileName = $"{Paths.Base}MITC\{FileName}.ini"
         IniCache.Remove(FileName)
     End Sub
     ''' <summary>
@@ -538,7 +538,7 @@ Public Module ModBase
     Private Function IniGetContent(FileName As String) As ConcurrentDictionary(Of String, String)
         Try
             '还原文件路径
-            If Not FileName.Contains(":\") Then FileName = $"{Paths.Base}PCL\{FileName}.ini"
+            If Not FileName.Contains(":\") Then FileName = $"{Paths.Base}MITC\{FileName}.ini"
             '检索缓存
             Dim Cache As ConcurrentDictionary(Of String, String) = Nothing
             If IniCache.TryGetValue(FileName, Cache) Then Return Cache
@@ -612,7 +612,7 @@ Public Module ModBase
                 FileContent.Append(Pair.Value)
                 FileContent.Append(vbCrLf)
             Next
-            If Not FileName.Contains(":\") Then FileName = $"{Paths.Base}PCL\{FileName}.ini"
+            If Not FileName.Contains(":\") Then FileName = $"{Paths.Base}MITC\{FileName}.ini"
             '处理相对路径
             FileName = If(FileName.Contains(":\"), FileName, Paths.Base & FileName)
             FileUtils.Write(FileName, FileContent.ToString)
@@ -636,7 +636,7 @@ Public Module ModBase
             FileUtils.Delete(TestFilePath)
             Return True
         Catch ex As Exception
-            Logger.Warn(ex, $"没有对文件夹 {Folder} 的权限，请尝试以管理员权限运行 PCL")
+            Logger.Warn(ex, $"没有对文件夹 {Folder} 的权限，请尝试以管理员权限运行 MITC")
             Return False
         End Try
     End Function
@@ -850,7 +850,7 @@ Public Module ModBase
         ElseIf PathTemp.IsAsciiOnly() Then
             Return PathTemp
         Else
-            Return OsDrive & "ProgramData\PCL\"
+            Return OsDrive & "ProgramData\MITC\"
         End If
     End Function
 
@@ -1049,7 +1049,7 @@ Public Module ModBase
         Catch ex As Exception
             Logger.Warn(ex, $"无法打开网页（{Url}）")
             ClipboardSet(Url, False)
-            MyMsgBox("可能由于浏览器未正确配置，PCL 无法为你打开网页。" & vbCrLf & "网址已经复制到剪贴板，若有需要可以手动粘贴访问。" & vbCrLf &
+            MyMsgBox("可能由于浏览器未正确配置，MITC 无法为你打开网页。" & vbCrLf & "网址已经复制到剪贴板，若有需要可以手动粘贴访问。" & vbCrLf &
                      $"网址：{Url}", "无法打开网页")
         End Try
     End Sub

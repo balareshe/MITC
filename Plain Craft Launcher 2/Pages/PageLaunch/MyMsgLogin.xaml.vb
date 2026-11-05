@@ -126,7 +126,7 @@
                 If TypeOf ex Is HttpRequestCodeException Then
                     Dim Response = CType(ex, HttpRequestCodeException).Response
                     If Response.Contains("authorization_declined") Then
-                        Finished(New Exception("$你拒绝了 PCL 申请的权限……"))
+                        Finished(New Exception("$你拒绝了 MITC 申请的权限……"))
                         Return
                     ElseIf Response.Contains("expired_token") Then
                         Finished(New Exception("$登录用时太长啦，重新试试吧！"))

@@ -1,0 +1,67 @@
+<local:MyPageRight
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:PCL" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    mc:Ignorable="d" x:Class="PageSetupLicense"
+    PanScroll="PanBack">
+    <local:MyScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
+        <StackPanel x:Name="PanMain" Margin="25,10">
+            <local:MyCard Margin="0,15" Title="授权信息">
+                <Grid Margin="25,40,25,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Name" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="28" />
+                        <RowDefinition Height="9" />
+                        <RowDefinition Height="28" />
+                        <RowDefinition Height="9" />
+                        <RowDefinition Height="28" />
+                        <RowDefinition Height="9" />
+                        <RowDefinition Height="28" />
+                        <RowDefinition Height="9" />
+                        <RowDefinition Height="28" />
+                        <RowDefinition Height="5" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Text="授权状态" Margin="0,0,25,0" />
+                    <TextBlock x:Name="TextLicenseState" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" Text="未授权" />
+                    <TextBlock Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Left" Text="授权码" Margin="0,0,25,0" />
+                    <TextBlock x:Name="TextLicenseKey" Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" Text="—" />
+                    <TextBlock Grid.Row="4" VerticalAlignment="Center" HorizontalAlignment="Left" Text="设备标识" Margin="0,0,25,0" />
+                    <TextBlock x:Name="TextLicenseDevice" Grid.Row="4" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" Text="—"
+                               ToolTip="首次校验授权时会绑定到这台设备，此后该授权码只能在本机使用。" />
+                    <TextBlock Grid.Row="6" VerticalAlignment="Center" HorizontalAlignment="Left" Text="最近校验" Margin="0,0,25,0" />
+                    <TextBlock x:Name="TextLicenseLastOk" Grid.Row="6" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" Text="尚未校验"
+                               ToolTip="授权服务器连不上时，会在最近一次校验成功后的 7 天内继续放行。" />
+                    <TextBlock Grid.Row="8" VerticalAlignment="Center" HorizontalAlignment="Left" Text="有效期" Margin="0,0,25,0" />
+                    <TextBlock x:Name="TextLicenseExpires" Grid.Row="8" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" Text="—"
+                               ToolTip="授权码到期后需要重新获取；留空表示永久有效。" />
+                    <Grid Height="35" Grid.Row="10" Grid.ColumnSpan="2" Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Button" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Button" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Button" />
+                        </Grid.ColumnDefinitions>
+                        <local:MyButton Grid.Column="0" x:Name="BtnLicenseRecheck" MinWidth="140" Text="重新校验" Padding="13,0" Margin="0,0,20,0" />
+                        <local:MyButton Grid.Column="1" x:Name="BtnLicenseCopy" MinWidth="140" Text="复制授权码" Padding="13,0" Margin="0,0,20,0" />
+                        <local:MyButton Grid.Column="2" x:Name="BtnLicenseChange" MinWidth="140" Text="更换授权码" Padding="13,0" Margin="0,0,20,0" />
+                    </Grid>
+                </Grid>
+            </local:MyCard>
+            <local:MyCard Margin="0,0,0,15" Title="授权说明">
+                <StackPanel Margin="25,40,25,20">
+                    <TextBlock TextWrapping="Wrap" Opacity="0.75" LineHeight="22" Margin="0,0,0,8"
+                               Text="本启动器为个人修改版，需要授权码才能使用。请在启动时输入维护者提供的授权码。" />
+                    <TextBlock TextWrapping="Wrap" Opacity="0.75" LineHeight="22" Margin="0,0,0,8"
+                               Text="授权码会在首次校验时绑定当前设备，之后只能在本机使用；换机请联系维护者解绑。" />
+                    <TextBlock TextWrapping="Wrap" Opacity="0.75" LineHeight="22" Margin="0,0,0,8"
+                               Text="连不上授权服务器时，会在最近一次校验成功后的 7 天内继续放行，请尽量保持网络可用。" />
+                    <TextBlock TextWrapping="Wrap" Opacity="0.75" LineHeight="22"
+                               Text="授权码与设备标识都属于敏感信息，请勿公开截图或分享给他人。" />
+                </StackPanel>
+            </local:MyCard>
+        </StackPanel>
+    </local:MyScrollViewer>
+</local:MyPageRight>
