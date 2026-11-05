@@ -37,15 +37,15 @@ Public Class PageLinkMain
 
 ''' <summary>
 ''' 房间名前缀。**这个值和中继的 --relay-network-whitelist 是一对**：
-''' 中继目前只转发 PCLB-* 的网络，改成别的前缀会让所有房间被中继立刻断开。
+    ''' 中继白名单目前放行 PCLB-* 与 MITCB-* 两种前缀，见 NET_PREFIX 说明。
 ''' 要改前缀，必须先在两个中继上改白名单并重启，再发客户端。
 ''' </summary>
-Private Const NET_PREFIX As String = "PCLB-"
-    'PCLB-P{4位端口hex}-{5位随机}  =>  16 字符
-    Private Const CODE_NAME_LEN As Integer = 16
-    'PCLB-Pxxxx-yyyyy-sssss-vvddd  =>  28 字符
-    Private Const CODE_TOTAL_LEN As Integer = 28
-
+    Private Const NET_PREFIX As String = "MITCB-"
+    '房间名 = {前缀}P{4位端口hex}-{5位随机}
+    '  前缀长度 + 11：PCLB-（5）→ 16 字符，MITCB-（6）→ 17 字符
+    Private Shared ReadOnly CODE_NAME_LEN As Integer = NET_PREFIX.Length + 11
+    '邀请码 = 房间名 + '-' + 5位密码 + '-' + 2位版本 + 3位发现节点 = 房间名长度 + 12
+    Private Shared ReadOnly CODE_TOTAL_LEN As Integer = CODE_NAME_LEN + 12
     '===============================
     '  状态机与前端页面
     '===============================
@@ -205,13 +205,14 @@ Private Const NET_PREFIX As String = "PCLB-"
         '                [17..22)            密码
         '                        [23..25)    版本
         '                                [25..28) 发现节点
-        ServerPort = Code.Substring(6, 4).ConvertRadix(16, 10)
+        '偏移全部相对前缀：{前缀}P{4hex}-{5rand}-{5secret}-{2ver}{3disc}
+        ServerPort = Code.Substring(NET_PREFIX.Length + 1, 4).ConvertRadix(16, 10)
         NetworkName = Code.Substring(0, CODE_NAME_LEN)
-        NetworkSecret = Code.Substring(17, 5)
-        If Code.Substring(25, 3) = "000" Then
+        NetworkSecret = Code.Substring(CODE_NAME_LEN + 1, 5)
+        If Code.Substring(CODE_NAME_LEN + 9, 3) = "000" Then
             DiscoverNodeID = -2
         Else
-            DiscoverNodeID = Code.Substring(25, 3).ConvertRadix(16, 10)
+            DiscoverNodeID = Code.Substring(CODE_NAME_LEN + 9, 3).ConvertRadix(16, 10)
         End If
         Logger.Info($"尝试加入房间，网络名 {NetworkName}，网络密码 {NetworkSecret}，端口 {ServerPort}，发现节点 {DiscoverNodeID}")
         '启动
@@ -223,30 +224,31 @@ Private Const NET_PREFIX As String = "PCLB-"
         Code = FixCodeFormat(Code)
         '判断类型
         If Not (Code.Length = CODE_TOTAL_LEN AndAlso Code.StartsWithF(NET_PREFIX) AndAlso
-                Code(4) = "-"c AndAlso Code(10) = "-"c AndAlso Code(16) = "-"c AndAlso Code(22) = "-"c) Then
+                Code(NET_PREFIX.Length - 1) = "-"c AndAlso Code(NET_PREFIX.Length + 5) = "-"c AndAlso
+                Code(CODE_NAME_LEN) = "-"c AndAlso Code(CODE_NAME_LEN + 6) = "-"c) Then
             If Code.StartsWithF("U/") Then 'HMCL
                 Return "请让房主使用 MITC 创建房间！"
             ElseIf Code.Length = 10 Then 'PCL CE
                 Return "请让房主使用非社区版的 MITC 创建房间！"
             ElseIf Code.Length = 23 AndAlso Code(0) = "P"c AndAlso Code(11) = "-"c Then
-                '旧格式（没有 PCLB- 前缀）
+                '旧格式（没有前缀）
                 Return $"这是旧版邀请码。请双方都升级到最新版 MITC 后再联机——新版房间名带 {NET_PREFIX} 前缀，中继只给这种房间转发。"
             Else
                 Return "邀请码有误，请让房主使用 MITC 创建房间！"
             End If
         End If
         '校验版本
-        If Val(Code.Substring(23, 2)) > INVITE_CODE_VERSION Then Return "你的 MITC 版本太老了，请在更新 MITC 之后再联机！"
+        If Val(Code.Substring(CODE_NAME_LEN + 7, 2)) > INVITE_CODE_VERSION Then Return "你的 MITC 版本太老了，请在更新 MITC 之后再联机！"
         Return Nothing
     End Function
     Private Shared Function FixCodeFormat(Code As String) As String
         Code = Code.Between("【", "】").Between("[", "]") '从完整消息中提取
         Code = Code.Upper.Replace("O", "0").Replace("I", "1") '输入修正
-        '版本 1 兼容
-        If Code.Length >= 17 AndAlso Code.Length < CODE_TOTAL_LEN AndAlso
-           (Code.Length < 23 OrElse (Code.Length >= 18 AndAlso Code(17) <> "-"c)) Then
-            Code = Code.Substring(0, 17) & "-0105E"
+        '旧码兼容：只处理 17 字符的 "PCLB-Pxxxx-yyyyy"（没有密码与版本段）
+        If Code.StartsWithF("PCLB-") AndAlso Code.Length = 17 Then
+            Code = Code & "-0105E"
         End If
+
         Return Code
     End Function
 
