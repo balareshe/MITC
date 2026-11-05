@@ -1093,6 +1093,21 @@ Friend Module ModSecret
     End Function
 
     ''' <summary>距上次校验成功是否还在 7 天宽限期内。</summary>
+    ''' <summary>
+    ''' 本地缓存的授权是否仍在有效期内（默认 6 小时）。
+    ''' 用于启动加速：命中缓存就跳过联网校验，改为后台静默刷新。
+    ''' </summary>
+    Friend Function LicenseFresh() As Boolean
+        Try
+            Dim Raw As String = Settings.Get(Of String)("SystemLicenseLastOk")
+            If Raw = "" Then Return False
+            Dim Last As Long
+            If Not Long.TryParse(Raw, Last) Then Return False
+            Return (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - Last) <= 21600
+        Catch
+            Return False
+        End Try
+    End Function
     Friend Function LicenseWithinGrace() As Boolean
         Try
             Dim Raw As String = Settings.Get(Of String)("SystemLicenseLastOk")
@@ -1118,6 +1133,30 @@ Friend Module ModSecret
         End Try
 
         If Key <> "" Then
+            '启动加速：本地缓存 6 小时内直接放行，联网校验放到后台静默刷新
+            If LicenseFresh() Then
+                Logger.Info("授权在本地缓存内有效，跳过启动时联网校验（后台静默刷新）")
+                Dim RefreshThread As New Threading.Thread(
+                    Sub()
+                        Dim R As Integer = 0
+                        Try
+                            Dim M As String = ""
+                            R = LicenseVerify(Key, M)
+                            If R = -1 Then
+                                Settings.Set("SystemLicenseKey", "")
+                                Logger.Warn($"后台授权校验被拒绝：{M}")
+                                RunInUiWait(Sub() Hint("授权码已失效，请重新输入", HintType.Red))
+                            ElseIf R = 1 Then
+                                Logger.Info("后台授权刷新通过")
+                            End If
+                        Catch ex As Exception
+                            Logger.Warn(ex, "后台授权刷新异常")
+                        End Try
+                    End Sub)
+                RefreshThread.IsBackground = True
+                RefreshThread.Start()
+                Return True
+            End If
             'PCL 的 NetClient 禁止在 UI 线程发起非 127.x 的请求（ModNet:219），
             '而本函数运行在 Application.OnStartup 的 UI 线程上。
             '之前只在本机 127.0.0.1 测试，恰好命中它的 localhost 豁免，所以问题被掩盖。

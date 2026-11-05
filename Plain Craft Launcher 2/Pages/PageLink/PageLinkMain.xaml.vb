@@ -118,7 +118,7 @@ Public Class PageLinkMain
                     '必须带 --wait：否则新实例会认为"已有 MITC 在运行"并立刻退出，
                     '而旧实例同时也在退出，结果两个都没了。
                     Logger.Info("用户选择「继续」，正在以管理员身份重启（--wait）")
-                    Diagnostics.Process.Start(New Diagnostics.ProcessStartInfo(PathExe) With {.Verb = "runas", .Arguments = "--wait"})
+                    Diagnostics.Process.Start(New Diagnostics.ProcessStartInfo(PathExe) With {.Verb = "runas", .Arguments = "--wait --link"})
                 Catch ex As Exception
                     Logger.Warn(ex, "以管理员身份重启失败")
                     RunInUiWait(Sub() Hint("未获得管理员授权，联机功能不可用"))

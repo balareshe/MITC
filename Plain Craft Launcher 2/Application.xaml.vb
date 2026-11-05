@@ -36,6 +36,11 @@ Public Class Application
                 Environment.SetEnvironmentVariable("windir", Environment.GetEnvironmentVariable("SystemRoot"), EnvironmentVariableTarget.User)
                 Dim _unused As New FormattedText("", Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, Fonts.SystemTypefaces.First, 96, New MyColor, DPI)
             End Try
+            '从「联机需要管理员权限」重启过来时，自动打开联机页
+            If e.Args IsNot Nothing AndAlso e.Args.Any(Function(a) a = "--link") Then
+                FormMain.StartupOpenLink = True
+                Logger.Info("检测到 --link，启动后自动打开联机页")
+            End If
             '检查参数调用
             If e.Args.Length > 0 Then
                 If e.Args(0) = "--update" Then
@@ -248,7 +253,12 @@ RetryCacheCheck:
             '等待已有的 PCL 退出
             If e.Args.Length > 0 AndAlso e.Args(0) = "--wait" Then
                 Try
-                    If PclMutex.WaitOne(10000) Then Return '等待至多 10 秒
+                    '旧实例正在退出（例如提权重启），最多等 30 秒，避免两个实例同时跑
+                If PclMutex.WaitOne(30000) Then
+                    Logger.Info("已等待旧实例退出")
+                    Return
+                End If
+                Logger.Warn("等待旧实例超时（30 秒），仍继续启动")
                 Catch Ignored As AbandonedMutexException
                     Return '已有实例异常退出，继续启动
                 End Try

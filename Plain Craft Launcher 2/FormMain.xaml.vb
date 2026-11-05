@@ -235,6 +235,16 @@ Public Class FormMain
         End Sub, "初始化", ThreadPriority.Lowest)
 
         Logger.Info($"第三阶段加载用时：{GetTimeMs() - ApplicationStartTick} ms")
+        '提权重启过来时直接进联机页
+        If StartupOpenLink Then
+            StartupOpenLink = False
+            Try
+                PageChange(PageType.Link)
+                Logger.Info("已自动切换到联机页")
+            Catch ex As Exception
+                Logger.Warn(ex, "自动切换联机页失败")
+            End Try
+        End If
         '启动后静默检查一次更新，有新版本才弹窗
         UpdateCheckAuto()
     End Sub
@@ -1056,6 +1066,10 @@ Public Class FormMain
     ''' <summary>
     ''' 当前的主页面。
     ''' </summary>
+    ''' <summary>
+    ''' 启动后是否自动打开联机页（由 --link 参数设置）。
+    ''' </summary>
+    Public Shared StartupOpenLink As Boolean = False
     Public PageCurrent As PageStackData = PageType.Launch
     ''' <summary>
     ''' 上一个主页面。
