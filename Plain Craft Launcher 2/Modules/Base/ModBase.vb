@@ -6,16 +6,16 @@ Public Module ModBase
 #Region "声明"
 
     '下列版本信息由更新器自动修改
-    Public Const VersionBaseName As String = "2.13.0.1.465" '显示用版本名：上游基线 + 本修改版构建号
+    Public Const VersionBaseName As String = "2.13.0.1.466" '显示用版本名：上游基线 + 本修改版构建号
     Public Const CommitHash As String = "" 'Commit Hash，由 GitHub Workflow 自动替换
     'VersionCode 跟随本修改版自己的发布节奏递增：
     '  每次发布 +1；新增功能或较大改动可 +2 ~ +5。
     '  VersionBaseName 是显示用版本名，形如 2.13.0.1.<versionCode>：
     '  前缀保留上游基线，后缀是本修改版自己的构建号，两者需同步修改。
 #If RELEASE Then
-    Public Const VersionCode As Integer = 465 '正式版
+    Public Const VersionCode As Integer = 466 '正式版
 #Else
-    Public Const VersionCode As Integer = 466 '快照版
+    Public Const VersionCode As Integer = 467 '快照版
 #End If
 
     '版本信息
@@ -47,7 +47,9 @@ Public Module ModBase
     ''' <summary>
     ''' 程序内嵌图片文件夹路径，以 / 结尾。
     ''' </summary>
-    Public PathImage As String = "pack://application:,,,/Plain Craft Launcher 2;component/Images/"
+    Public PathImage As String = "pack://application:,,,/images/"
+    '用相对 pack URI（不带程序集名）：程序集改名后依然指向自己，
+    '不必再跟着 AssemblyName 改。资源键本身是小写，这里也用小写避免大小写差异。
     ''' <summary>
     ''' 程序的缓存文件夹路径，以 \ 结尾。
     ''' </summary>
