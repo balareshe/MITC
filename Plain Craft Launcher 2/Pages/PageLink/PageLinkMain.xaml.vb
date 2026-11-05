@@ -847,7 +847,9 @@ Public Class PageLinkMain
                     Case -1 'CLI 无返回
                         Panic("无法启动联机模块", "近期日志：" & vbCrLf & LogHistory.Join(vbCrLf))
                     Case 0 'CLI 有返回，但未连接到任何节点
-                        Panic("无法连接到节点", "请检查你的网络环境是否良好，稍后重试。")
+                        Dim BriefLog As String = If(LogHistory.Count > 0,
+    vbCrLf & vbCrLf & "近期模块日志：" & vbCrLf & LogHistory.Join(vbCrLf), "")
+Panic("无法连接到节点", "请检查你的网络环境是否良好，稍后重试。" & BriefLog)
                     Case Else '已连接到节点，但未连接到房主
                         Panic("无法连接到房主", $"可能的原因：{vbCrLf}- 你或者房主的网络环境不佳{vbCrLf}- 房主已关闭房间{vbCrLf}- 邀请码输错了")
                 End Select
@@ -993,7 +995,8 @@ ForcedPass:
     ''' </summary>
     Private Shared Function KillElevated(Pid As Integer) As Boolean
         Try
-            Dim Info As New ProcessStartInfo("cmd.exe", $"/c taskkill /F /PID {Pid}") With {
+            '提权启动时外层是 cmd.exe，模块是它的子进程，必须 /T 一起结束
+            Dim Info As New ProcessStartInfo("cmd.exe", $"/c taskkill /F /T /PID {Pid}") With {
                 .UseShellExecute = True,
                 .Verb = "runas",
                 .WindowStyle = ProcessWindowStyle.Hidden,
@@ -1018,6 +1021,57 @@ ForcedPass:
     ''' 只在本次运行内有效，不写入配置，避免残留一个已失效的路径。
     ''' </summary>
     Private Shared EasyTierRunDirOverride As String = ""
+
+    ''' <summary>提权启动时模块输出被重定向到的文件。</summary>
+    Private Shared ModuleLogPath As String = ""
+
+    ''' <summary>日志回读线程是否继续。</summary>
+    Private Shared ModuleLogTailing As Boolean = False
+
+    ''' <summary>
+    ''' 回读提权启动时写进文件的模块输出，喂给 ProcessLogLine。
+    ''' 这样「无法连接」面板里能直接看到 EasyTier 的真实报错。
+    ''' </summary>
+    Private Sub StartModuleLogTail()
+        If String.IsNullOrEmpty(ModuleLogPath) Then Return
+        ModuleLogTailing = True
+        Dim T As New Threading.Thread(
+            Sub()
+                Dim Position As Long = 0
+                Dim Carry As String = ""
+                Do While ModuleLogTailing
+                    Threading.Thread.Sleep(250)
+                    Try
+                        If Not FileUtils.Exists(ModuleLogPath) Then Continue Do
+                        Using Fs As New IO.FileStream(ModuleLogPath, IO.FileMode.Open, IO.FileAccess.Read,
+                                                      IO.FileShare.ReadWrite)
+                            If Fs.Length <= Position Then Continue Do
+                            Fs.Seek(Position, IO.SeekOrigin.Begin)
+                            Using Reader As New IO.StreamReader(Fs, Encoding.UTF8)
+                                Dim Chunk As String = Reader.ReadToEnd()
+                                Position = Fs.Position
+                                Dim Text As String = Carry & Chunk
+                                Dim Lines = Text.Split(New String() {vbCrLf, vbLf}, StringSplitOptions.None)
+                                '最后一段可能还没写完，留到下一轮
+                                Carry = Lines(Lines.Length - 1)
+                                For i = 0 To Lines.Length - 2
+                                    If Lines(i).Trim() <> "" Then ProcessLogLine(Lines(i))
+                                Next
+                            End Using
+                        End Using
+                    Catch ex As Exception
+                        Logger.Warn(ex, "回读联机模块日志失败")
+                    End Try
+                Loop
+            End Sub)
+        T.IsBackground = True
+        T.Name = "LinkModuleLogTail"
+        T.Start()
+    End Sub
+
+    Private Shared Sub StopModuleLogTail()
+        ModuleLogTailing = False
+    End Sub
     Private Shared ProcessCore As Process
     Private Shared ProcessOutputHandle As AutoResetEvent, ProcessErrorHandle As AutoResetEvent
 
@@ -1027,6 +1081,7 @@ ForcedPass:
     ''' </summary>
     Public Shared Sub ProcessStop()
         Try
+            StopModuleLogTail()
             '关闭未捕获的进程
             For Each ProcessObject In Process.GetProcesses
                 If ProcessObject.Id = ProcessCore?.Id Then Continue For
@@ -1099,7 +1154,8 @@ ForcedPass:
                 .RedirectStandardError = True,
                 .RedirectStandardOutput = True,
                 .StandardOutputEncoding = Encoding.UTF8,
-                .StandardErrorEncoding = Encoding.UTF8
+                .StandardErrorEncoding = Encoding.UTF8,
+                .WorkingDirectory = ModuleDir()
             }
             ProcessCore = New Process With {.StartInfo = Info}
             Dim LogLineHandler =
@@ -1123,22 +1179,32 @@ ForcedPass:
             ProcessCore.BeginOutputReadLine()
             ProcessCore.BeginErrorReadLine()
         Else
-            '不是管理员：只对联机模块本身提权，主程序保持非管理员，不再重启自己
-            '代价：拿不到模块的 stdout/stderr 重定向，连接事件改为由 CLI 轮询驱动。
+            '不是管理员：只对联机模块本身提权，主程序保持非管理员，不再重启自己。
+            '提权启动没法直接重定向 stdout，所以用 cmd 包一层把输出写到文件，再回读。
             Logger.Info("当前非管理员，使用 runas 启动联机模块（会弹出一次 UAC）")
-            Dim Info As New ProcessStartInfo With {
-                .FileName = ModulePath,
-                .Arguments = Arguments,
+            ModuleLogPath = Paths.BaseThenName & "LinkModule.log"
+            Try
+                FileUtils.Delete(ModuleLogPath)
+            Catch
+            End Try
+            Dim QuoteMark As String = Chr(34)
+            Dim EscapedExe As String = QuoteMark & ModulePath & QuoteMark
+            Dim EscapedLog As String = QuoteMark & ModuleLogPath & QuoteMark
+            Dim CmdArgs As String = $"/c {EscapedExe} {Arguments} > {EscapedLog} 2>&1"
+            Dim Info As New ProcessStartInfo("cmd.exe", CmdArgs) With {
                 .UseShellExecute = True,
                 .Verb = "runas",
-                .WindowStyle = ProcessWindowStyle.Hidden
+                .WindowStyle = ProcessWindowStyle.Hidden,
+                .CreateNoWindow = True,
+                .WorkingDirectory = ModuleDir()
             }
             ProcessCore = New Process With {.StartInfo = Info}
             Try
                 ProcessCore.Start()
                 Dim StartedPid As Integer = -1
                 Try : StartedPid = ProcessCore.Id : Catch : End Try
-                Logger.Info($"联机模块已请求提权启动，PID：{StartedPid}")
+                Logger.Info($"联机模块已请求提权启动，PID：{StartedPid}，模块日志：{ModuleLogPath}")
+                StartModuleLogTail()
             Catch ex As Exception
                 ProcessCore = Nothing
                 Throw New Exception("未能获得管理员权限，联机模块无法启动。" & vbCrLf &
