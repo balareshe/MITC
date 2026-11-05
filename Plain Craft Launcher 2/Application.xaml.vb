@@ -94,6 +94,41 @@ Public Class Application
             Catch ex As Exception
                 Logger.Warn(ex, "迁移旧数据目录失败")
             End Try
+            '清理改名前的残留目录（PCL\）：能删就删，删不掉（被占用）就算了
+            Try
+                Dim OldAppData As String = IO.Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PCL")
+                '只在配置已成功迁移到新目录后才删旧配置目录
+                If IO.Directory.Exists(OldAppData) AndAlso
+                   IO.File.Exists(IO.Path.Combine(Paths.AppDataThenName, "config.json")) Then
+                    Try
+                        IO.Directory.Delete(OldAppData, True)
+                        Logger.Info($"已清理旧配置目录：{OldAppData}")
+                    Catch exx As Exception
+                        Logger.Warn(exx, "旧配置目录删除失败（可能被占用）")
+                    End Try
+                End If
+                Dim OldTemp As String = IO.Path.Combine(IO.Path.GetTempPath(), "PCL")
+                If IO.Directory.Exists(OldTemp) Then
+                    Try
+                        IO.Directory.Delete(OldTemp, True)
+                        Logger.Info($"已清理旧临时目录：{OldTemp}")
+                    Catch exx As Exception
+                        Logger.Warn(exx, "旧临时目录删除失败（可能被占用）")
+                    End Try
+                End If
+                Dim OldBaseDir2 As String = Paths.Base & "PCL\"
+                If IO.Directory.Exists(OldBaseDir2) Then
+                    Try
+                        IO.Directory.Delete(OldBaseDir2, True)
+                        Logger.Info($"已清理旧数据目录：{OldBaseDir2}")
+                    Catch exx As Exception
+                        Logger.Warn(exx, "旧数据目录删除失败（可能被占用）")
+                    End Try
+                End If
+            Catch ex As Exception
+                Logger.Warn(ex, "清理旧目录失败")
+            End Try
             DirectoryUtils.Create(Paths.Base & "MITC\Pictures\")
                 DirectoryUtils.Create(Paths.Base & "MITC\Musics\")
                 CheckPermissionWithException(Paths.Base & "MITC\")
@@ -110,12 +145,12 @@ RetryCacheCheck:
                 DirectoryUtils.Create(PathTemp)
                 CheckPermissionWithException(PathTemp)
             Catch ex As Exception
-                If PathTemp = Path.GetTempPath() & "PCL\" Then
+                If PathTemp = Path.GetTempPath() & "MITC\" Then
                     MyMsgBox("MITC 无法访问缓存文件夹，可能导致程序出错或无法正常使用！" & vbCrLf & vbCrLf & "错误原因：" & ex.GetDisplay(True), "缓存文件夹不可用")
                 Else
                     MyMsgBox("手动设置的缓存文件夹不可用，MITC 将使用默认缓存文件夹。" & vbCrLf & vbCrLf & "错误原因：" & ex.GetDisplay(True), "缓存文件夹不可用")
                     Settings.Set("SystemSystemCache", "")
-                    PathTemp = Path.GetTempPath() & "PCL\"
+                    PathTemp = Path.GetTempPath() & "MITC\"
                     GoTo RetryCacheCheck
                 End If
             End Try

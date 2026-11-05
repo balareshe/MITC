@@ -6,16 +6,16 @@ Public Module ModBase
 #Region "声明"
 
     '下列版本信息由更新器自动修改
-    Public Const VersionBaseName As String = "2.13.0.1.476" '显示用版本名：上游基线 + 本修改版构建号
+    Public Const VersionBaseName As String = "2.13.0.1.478" '显示用版本名：上游基线 + 本修改版构建号
     Public Const CommitHash As String = "" 'Commit Hash，由 GitHub Workflow 自动替换
     'VersionCode 跟随本修改版自己的发布节奏递增：
     '  每次发布 +1；新增功能或较大改动可 +2 ~ +5。
     '  VersionBaseName 是显示用版本名，形如 2.13.0.1.<versionCode>：
     '  前缀保留上游基线，后缀是本修改版自己的构建号，两者需同步修改。
 #If RELEASE Then
-    Public Const VersionCode As Integer = 476 '正式版
+    Public Const VersionCode As Integer = 478 '正式版
 #Else
-    Public Const VersionCode As Integer = 477 '快照版
+    Public Const VersionCode As Integer = 479 '快照版
 #End If
 
     '版本信息
@@ -53,7 +53,7 @@ Public Module ModBase
     ''' <summary>
     ''' 程序的缓存文件夹路径，以 \ 结尾。
     ''' </summary>
-    Public PathTemp As String = If(Settings.Get(Of String)("SystemSystemCache") = "", Path.GetTempPath() & "PCL\", Settings.Get(Of String)("SystemSystemCache")).ToString.Replace("/", "\").TrimEnd("\") & "\"
+    Public PathTemp As String = If(Settings.Get(Of String)("SystemSystemCache") = "", Path.GetTempPath() & "MITC\", Settings.Get(Of String)("SystemSystemCache")).ToString.Replace("/", "\").TrimEnd("\") & "\"
     ''' <summary>
     ''' 当前程序的语言。
     ''' </summary>
