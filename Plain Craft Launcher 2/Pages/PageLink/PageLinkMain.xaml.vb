@@ -452,7 +452,7 @@ Public Class PageLinkMain
     ''' </summary>
     Private Function ModuleDir() As String
         Try
-            Dim Override As String = Settings.Get(Of String)("LinkEasyTierRunDir")
+            Dim Override As String = EasyTierRunDirOverride
             If Not String.IsNullOrWhiteSpace(Override) AndAlso
                FileUtils.Exists(Override & "联机模块.exe") AndAlso
                FileUtils.Exists(Override & "联机模块 CLI.exe") Then
@@ -688,7 +688,7 @@ Public Class PageLinkMain
                     IO.Directory.CreateDirectory(AltDir)
                     DirectoryUtils.Copy(SourceDir, AltDir)
                     TargetDir = AltDir
-                    Settings.Set("LinkEasyTierRunDir", AltDir)
+                    EasyTierRunDirOverride = AltDir
                     Logger.Info($"联机模块原目录被占用，已改用备用目录：{AltDir}")
                     CopyDone = True
                 Catch ex As Exception
@@ -734,7 +734,7 @@ Public Class PageLinkMain
             FileUtils.Delete(PathEasyTier & "EasyTier.zip")
             Settings.Set("LinkEasyTierVersion", ServerVersion)
             '原地解压成功就把备用目录标记清掉，下次回到主目录
-            If TargetDir = PathEasyTier Then Settings.Set("LinkEasyTierRunDir", "")
+            If TargetDir = PathEasyTier Then EasyTierRunDirOverride = ""
         End If
         Task.Progress = 0.07
         '获取节点列表
@@ -1013,6 +1013,11 @@ ForcedPass:
     ''' <summary>
     ''' EasyTier Core 进程。
     ''' </summary>
+    ''' <summary>
+    ''' 联机模块的备用运行目录（原目录被占用时切到 alt-&lt;版本&gt;）。
+    ''' 只在本次运行内有效，不写入配置，避免残留一个已失效的路径。
+    ''' </summary>
+    Private Shared EasyTierRunDirOverride As String = ""
     Private Shared ProcessCore As Process
     Private Shared ProcessOutputHandle As AutoResetEvent, ProcessErrorHandle As AutoResetEvent
 
