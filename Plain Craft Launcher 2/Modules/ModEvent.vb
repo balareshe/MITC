@@ -374,14 +374,14 @@ Public Class CustomEvent
             '绝对路径
             Location = RelativeUrl
             Logger.Info($"自定义事件中由绝对路径{Type}：{Location}")
-        ElseIf FileUtils.Exists(Paths.Base & "PCL\" & RelativeUrl) Then
+        ElseIf FileUtils.Exists(Paths.Base & "MITC\" & RelativeUrl) Then
             '相对 PCL 文件夹的路径
-            Location = Paths.Base & "PCL\" & RelativeUrl
+            Location = Paths.Base & "MITC\" & RelativeUrl
             Logger.Info($"自定义事件中由相对 MITC 文件夹的路径{Type}：{Location}")
-        ElseIf FileUtils.Exists(Paths.Base & "PCL\Help\" & RelativeUrl) Then
+        ElseIf FileUtils.Exists(Paths.Base & "MITC\Help\" & RelativeUrl) Then
             '相对 PCL 本地帮助文件夹的路径
-            Location = Paths.Base & "PCL\Help\" & RelativeUrl
-            WorkingDir = Paths.Base & "PCL\Help\"
+            Location = Paths.Base & "MITC\Help\" & RelativeUrl
+            WorkingDir = Paths.Base & "MITC\Help\"
             Logger.Info($"自定义事件中由相对 MITC 本地帮助文件夹的路径{Type}：{Location}")
         ElseIf Type = EventType.打开帮助 AndAlso FileUtils.Exists(PathTemp & "Help\" & RelativeUrl) Then
             '相对 PCL 自带帮助文件夹的路径

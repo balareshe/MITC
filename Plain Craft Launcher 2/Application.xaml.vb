@@ -68,9 +68,35 @@ Public Class Application
             End If
             '初始化文件结构
             Try
-                DirectoryUtils.Create(Paths.Base & "PCL\Pictures\")
-                DirectoryUtils.Create(Paths.Base & "PCL\Musics\")
-                CheckPermissionWithException(Paths.Base & "PCL\")
+                '把改名前的数据目录（启动器旁边的 PCL\）搬过来：图片、音乐、帮助、
+            '自定义皮肤、ini 配置、日志都在里面。只在目标不存在时才搬，避免覆盖新数据。
+            Try
+                Dim OldBaseDir As String = Paths.Base & "PCL\"
+                If IO.Directory.Exists(OldBaseDir) Then
+                    Dim MovedCount As Integer = 0
+                    For Each OldItem As String In IO.Directory.GetFileSystemEntries(OldBaseDir)
+                        Dim TargetItem As String = Paths.Base & "MITC\" & IO.Path.GetFileName(OldItem)
+                        If Not IO.File.Exists(TargetItem) AndAlso Not IO.Directory.Exists(TargetItem) Then
+                            Try
+                                If IO.Directory.Exists(OldItem) Then
+                                    IO.Directory.Move(OldItem, TargetItem)
+                                Else
+                                    IO.File.Move(OldItem, TargetItem)
+                                End If
+                                MovedCount += 1
+                            Catch exx As Exception
+                                Logger.Warn(exx, $"迁移旧数据项失败：{IO.Path.GetFileName(OldItem)}")
+                            End Try
+                        End If
+                    Next
+                    Logger.Info($"已从 PCL\ 迁移 {MovedCount} 个数据项到 MITC\")
+                End If
+            Catch ex As Exception
+                Logger.Warn(ex, "迁移旧数据目录失败")
+            End Try
+            DirectoryUtils.Create(Paths.Base & "MITC\Pictures\")
+                DirectoryUtils.Create(Paths.Base & "MITC\Musics\")
+                CheckPermissionWithException(Paths.Base & "MITC\")
             Catch ex As Exception
                 MsgBox($"MITC 没有对当前文件夹的权限（{Paths.Base}MITC\），请尝试：" & vbCrLf &
                   "1. 将 MITC 移动到其他文件夹" & If(Paths.Base.StartsWithF("C:", True), "，例如 C 盘和桌面以外的其他位置。", "。") & vbCrLf &

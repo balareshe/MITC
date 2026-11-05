@@ -555,13 +555,13 @@ Public Class PageInstanceExport
             If BuildType = BuildTypes.Release AndAlso IncludePCL Then FileUtils.Copy(PathExe, CacheFolder & "Plain Craft Launcher.exe")
             '复制 PCL 个性化内容
             If IncludePCLCustom Then
-                If DirectoryUtils.Exists(Paths.Base & "PCL\Pictures\") Then DirectoryUtils.Copy(Paths.Base & "PCL\Pictures\", CacheFolder & "PCL\Pictures\")
-                If DirectoryUtils.Exists(Paths.Base & "PCL\Musics\") Then DirectoryUtils.Copy(Paths.Base & "PCL\Musics\", CacheFolder & "PCL\Musics\")
-                If DirectoryUtils.Exists(Paths.Base & "PCL\Help\") Then DirectoryUtils.Copy(Paths.Base & "PCL\Help\", CacheFolder & "PCL\Help\")
-                If FileUtils.Exists(Paths.Base & "PCL\Custom.xaml") Then FileUtils.Copy(Paths.Base & "PCL\Custom.xaml", CacheFolder & "PCL\Custom.xaml")
-                If FileUtils.Exists(Paths.Base & "PCL\Setup.ini") Then FileUtils.Copy(Paths.Base & "PCL\Setup.ini", CacheFolder & "PCL\Setup.ini")
-                If FileUtils.Exists(Paths.Base & "PCL\hints.txt") Then FileUtils.Copy(Paths.Base & "PCL\hints.txt", CacheFolder & "PCL\hints.txt")
-                If FileUtils.Exists(Paths.Base & "PCL\Logo.png") Then FileUtils.Copy(Paths.Base & "PCL\Logo.png", CacheFolder & "PCL\Logo.png")
+                If DirectoryUtils.Exists(Paths.Base & "MITC\Pictures\") Then DirectoryUtils.Copy(Paths.Base & "MITC\Pictures\", CacheFolder & "PCL\Pictures\")
+                If DirectoryUtils.Exists(Paths.Base & "MITC\Musics\") Then DirectoryUtils.Copy(Paths.Base & "MITC\Musics\", CacheFolder & "PCL\Musics\")
+                If DirectoryUtils.Exists(Paths.Base & "MITC\Help\") Then DirectoryUtils.Copy(Paths.Base & "MITC\Help\", CacheFolder & "PCL\Help\")
+                If FileUtils.Exists(Paths.Base & "MITC\Custom.xaml") Then FileUtils.Copy(Paths.Base & "MITC\Custom.xaml", CacheFolder & "PCL\Custom.xaml")
+                If FileUtils.Exists(Paths.Base & "MITC\Setup.ini") Then FileUtils.Copy(Paths.Base & "MITC\Setup.ini", CacheFolder & "PCL\Setup.ini")
+                If FileUtils.Exists(Paths.Base & "MITC\hints.txt") Then FileUtils.Copy(Paths.Base & "MITC\hints.txt", CacheFolder & "PCL\hints.txt")
+                If FileUtils.Exists(Paths.Base & "MITC\Logo.png") Then FileUtils.Copy(Paths.Base & "MITC\Logo.png", CacheFolder & "PCL\Logo.png")
             End If
         End Sub) With {.ProgressWeight = 5})
 

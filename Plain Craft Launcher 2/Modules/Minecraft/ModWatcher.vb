@@ -362,7 +362,7 @@
                     Analyzer.Prepare()
                     Analyzer.Analyze()
                     Analyzer.Output(False, New List(Of String) From
-                        {Instance.PathVersion & Instance.Name & ".json", Paths.Base & "PCL\Log1.txt", Paths.Base & "PCL\LatestLaunch.bat"})
+                        {Instance.PathVersion & Instance.Name & ".json", Paths.Base & "MITC\Log1.txt", Paths.Base & "MITC\LatestLaunch.bat"})
                 Catch ex As Exception
                     Logger.Error(ex, "崩溃分析失败")
                 End Try
