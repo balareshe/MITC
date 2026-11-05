@@ -5,7 +5,7 @@ Imports System.Reflection
 Imports PCL
 
 Public Class PageLinkMain
-    '邀请码格式版本。3 = 房间名带 PCLB- 前缀（配合中继白名单 PCLB-*）
+    '邀请码格式版本。3 = 房间名带 NET_PREFIX 前缀（配合中继白名单）
     'EasyTier 联机模块压缩包的 SHA256（按架构）。
     '这个包从 GitHub 下载、解压后以管理员权限运行，不校验哈希等于把
     '「远程代码执行」交给任何能拦截该下载的人（恶意根证书、被控 CDN 等）。
@@ -163,10 +163,9 @@ Public Class PageLinkMain
             Next
             Return Result.Replace("O", "0").Replace("I", "1")
         End Function
-        '前缀是给中继白名单认的：中继只给 PCLB-* 开头的网络转发，
-        '别人随便起的名字用不了我们的中继。前缀用大写 P 开头，
-        '这样过渡期旧的 P* 白名单也还能匹配。
-        '房间名固定 16 字符：PCLB-P{4hex}-{5rand}，配合邀请码的 28 字符格式。
+        '前缀是给中继白名单认的：中继只转发白名单里的前缀，
+        '别人随便起的名字用不了我们的中继。
+        '房间名长度 = 前缀长度 + 11：MITCB-（6）→ 17 字符，PCLB-（5）→ 16 字符。
         NetworkName = $"{NET_PREFIX}P{ServerPort.ConvertRadix(16).PadLeft(4, "0"c)}-{GenerateRandomCode()}"
         NetworkSecret = GenerateRandomCode()
         DiscoverNodeID = -1
@@ -200,7 +199,7 @@ Public Class PageLinkMain
         Logger.Info($"实际使用的邀请码：{Code}")
         '基础信息
         IsServerSide = False
-        '新格式：PCLB-P{4hex}-{5}-{5}-{2ver}{3disc}
+        '新格式：{NET_PREFIX}P{4hex}-{5rand}-{5secret}-{2ver}{3disc}
         '        [0..16)                     名称
         '                [17..22)            密码
         '                        [23..25)    版本
@@ -244,7 +243,7 @@ Public Class PageLinkMain
     Private Shared Function FixCodeFormat(Code As String) As String
         Code = Code.Between("【", "】").Between("[", "]") '从完整消息中提取
         Code = Code.Upper.Replace("O", "0").Replace("I", "1") '输入修正
-        '旧码兼容：只处理 17 字符的 "PCLB-Pxxxx-yyyyy"（没有密码与版本段）
+        '旧码兼容：只处理历史格式 17 字符的 "PCLB-Pxxxx-yyyyy"（无密码与版本段）
         If Code.StartsWithF("PCLB-") AndAlso Code.Length = 17 Then
             Code = Code & "-0105E"
         End If
