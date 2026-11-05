@@ -181,11 +181,7 @@ RetryCacheCheck:
                 Return
             End If
 
-            '设置初始窗口：授权已通过，此时才显示启动动画
-            If Settings.Get(Of Boolean)("UiLauncherLogo") Then
-                FrmStart = New SplashScreen("Images\icon.ico")
-                FrmStart.Show(False, True)
-            End If
+            '启动动画（图标 SplashScreen）已按需求移除：启动时直接进入主界面
 
             '授权等待不应计入加载耗时
             ApplicationStartTick = GetTimeMs()
