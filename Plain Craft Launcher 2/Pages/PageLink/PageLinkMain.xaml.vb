@@ -464,6 +464,25 @@ Public Class PageLinkMain
     ''' </summary>
     Private PathEasyTier As String = Paths.AppDataThenName & "EasyTier\"
     ''' <summary>
+    ''' 联机模块实际运行的目录。
+    ''' 正常情况下就是 PathEasyTier；如果上次解压时原目录里的文件被占用
+    '''（典型是 WinDivert64.sys 被别的程序加载过），会换成独立子目录，
+    ''' 这里优先用那个目录，避免和锁死的旧文件继续纠缠。
+    ''' </summary>
+    Private Function ModuleDir() As String
+        Try
+            Dim Override As String = Settings.Get(Of String)("LinkEasyTierRunDir")
+            If Not String.IsNullOrWhiteSpace(Override) AndAlso
+               FileUtils.Exists(Override & "联机模块.exe") AndAlso
+               FileUtils.Exists(Override & "联机模块 CLI.exe") Then
+                Return Override
+            End If
+        Catch ex As Exception
+            Logger.Warn(ex, "读取联机模块备用目录失败")
+        End Try
+        Return PathEasyTier
+    End Function
+    ''' <summary>
     ''' 当前是服务端还是客户端。
     ''' </summary>
     Private IsServerSide As Boolean
@@ -567,8 +586,8 @@ Public Class PageLinkMain
         Telemetry("联机开始")
         '检查 EasyTier 版本
         UpdateLoadingPage("正在检查联机模块版本……", "检查联机模块版本")
-        If Not (FileUtils.Exists(PathEasyTier & "联机模块 CLI.exe") AndAlso FileUtils.Exists(PathEasyTier & "联机模块.exe") AndAlso
-                FileUtils.Exists(PathEasyTier & "Packet.dll")) Then
+        If Not (FileUtils.Exists(ModuleDir() & "联机模块 CLI.exe") AndAlso FileUtils.Exists(ModuleDir() & "联机模块.exe") AndAlso
+                FileUtils.Exists(ModuleDir() & "Packet.dll")) Then
             Settings.Set("LinkEasyTierVersion", -1)
         End If
         Dim LocalVersion As Integer = Settings.Get(Of Integer)("LinkEasyTierVersion")
@@ -686,6 +705,23 @@ Public Class PageLinkMain
                     Thread.Sleep(400)
                 End Try
             Next
+            '覆盖失败最可能的原因是目标目录里有文件被占用：WinDivert64.sys 被某个程序
+            '加载后，驱动卸载前这个文件会一直被锁着，杀进程也未必立刻释放。
+            '这时不再和旧文件较劲，换到 alt-<版本> 独立子目录解压，运行时也指向那里。
+            Dim TargetDir As String = PathEasyTier
+            If Not CopyDone Then
+                Dim AltDir As String = PathEasyTier & "alt-" & ServerVersion & "\"
+                Try
+                    IO.Directory.CreateDirectory(AltDir)
+                    DirectoryUtils.Copy(SourceDir, AltDir)
+                    TargetDir = AltDir
+                    Settings.Set("LinkEasyTierRunDir", AltDir)
+                    Logger.Info($"联机模块原目录被占用，已改用备用目录：{AltDir}")
+                    CopyDone = True
+                Catch ex As Exception
+                    LastError = ex
+                End Try
+            End If
             If Not CopyDone Then
                 Logger.Error($"解压联机模块失败：{LastError?.Message}")
                 Panic("解压联机模块失败",
@@ -700,11 +736,11 @@ Public Class PageLinkMain
             '重命名同样可能撞锁，一并重试
             For Attempt As Integer = 1 To 6
                 Try
-                    If FileUtils.Exists(PathEasyTier & "easytier-core.exe") Then
-                        FileUtils.Move(PathEasyTier & "easytier-core.exe", PathEasyTier & "联机模块.exe")
+                    If FileUtils.Exists(TargetDir & "easytier-core.exe") Then
+                        FileUtils.Move(TargetDir & "easytier-core.exe", TargetDir & "联机模块.exe")
                     End If
-                    If FileUtils.Exists(PathEasyTier & "easytier-cli.exe") Then
-                        FileUtils.Move(PathEasyTier & "easytier-cli.exe", PathEasyTier & "联机模块 CLI.exe")
+                    If FileUtils.Exists(TargetDir & "easytier-cli.exe") Then
+                        FileUtils.Move(TargetDir & "easytier-cli.exe", TargetDir & "联机模块 CLI.exe")
                     End If
                     Exit For
                 Catch ex As Exception
@@ -724,6 +760,8 @@ Public Class PageLinkMain
             '清理
             FileUtils.Delete(PathEasyTier & "EasyTier.zip")
             Settings.Set("LinkEasyTierVersion", ServerVersion)
+            '原地解压成功就把备用目录标记清掉，下次回到主目录
+            If TargetDir = PathEasyTier Then Settings.Set("LinkEasyTierRunDir", "")
         End If
         Task.Progress = 0.07
         '获取节点列表
@@ -1042,7 +1080,7 @@ ForcedPass:
     ''' </summary>
     Private Sub ProcessStart(Arguments As String)
         Dim Info = New ProcessStartInfo With {
-            .FileName = PathEasyTier & "联机模块.exe",
+            .FileName = ModuleDir() & "联机模块.exe",
             .Arguments = Arguments,
             .UseShellExecute = False,
             .CreateNoWindow = True,
@@ -1242,7 +1280,7 @@ ForcedPass:
             '开源版把这一行注释掉了，CliResult 恒为空，导致 Peers 永远是 Nothing，
             '联机必然在 30 秒后报「无法启动联机模块」。这里恢复真实调用。
             Dim CliResult As String = RunCliAndGetOutput(
-                PathEasyTier & "联机模块 CLI.exe", $"-o json -p 127.0.0.1:{RPCPort} peer", 4000)
+                ModuleDir() & "联机模块 CLI.exe", $"-o json -p 127.0.0.1:{RPCPort} peer", 4000)
             '解析
             If Not CliResult.Contains("lat_ms") Then Throw New Exception("CLI 调用失败：" & vbCrLf & CliResult)
             If GetUuid() Mod If(ModeDebug, 23, 103) = 0 Then Logger.Info($"CLI 输出抽样：{vbCrLf}{CliResult}")
