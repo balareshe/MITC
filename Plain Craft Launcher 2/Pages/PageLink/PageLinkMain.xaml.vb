@@ -193,7 +193,8 @@ Public Class PageLinkMain
     ''' <summary>
     ''' 输入邀请码，切换到联机页并立即加入房间。
     ''' </summary>
-    Public Shared Sub Join() Handles PanSelectJoin.MouseLeftButtonUp
+    Public Shared Sub Join() Handles PanSelectJoin.MouseLeftButtonUp        '授权已被后台判定失效时不允许联机
+        If Not LicenseGateForAction() Then Return
         Dim Code As String = MyMsgBoxInput("输入邀请码", "输入房主发给你的邀请码。",
             HintText:=If(String.IsNullOrEmpty(LastCode), "", "使用上一次的邀请码"))
         If Not String.IsNullOrEmpty(LastCode) AndAlso Code IsNot Nothing AndAlso Code = "" Then Code = LastCode
@@ -267,7 +268,8 @@ Public Class PageLinkMain
     ''' <summary>
     ''' 切换到联机页并立即加入指定房间。
     ''' </summary>
-    Public Shared Sub Join(Code As String)
+    Public Shared Sub Join(Code As String)        '授权已被后台判定失效时不允许联机
+        If Not LicenseGateForAction() Then Return
         If LinkState <> LinkStates.Waiting Then
             Hint("你已经在联机房间中了！", HintType.Red)
         ElseIf FrmMain.PageCurrent = FormMain.PageType.Link Then

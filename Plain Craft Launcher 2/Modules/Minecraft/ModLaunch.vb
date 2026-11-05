@@ -29,6 +29,8 @@
     ''' 返回是否实际开始了启动（如果没有，则一定弹出了错误提示）。
     ''' </summary>
     Public Function McLaunchStart(Optional Options As McLaunchOptions = Nothing) As Boolean
+        '授权已被后台判定失效时不允许启动游戏
+        If Not LicenseGateForAction() Then Return False
         CurrentLaunchOptions = If(Options, New McLaunchOptions)
         '预检查
         If Not RunInUi() Then Throw New Exception("McLaunchStart 必须在 UI 线程调用！")

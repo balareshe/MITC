@@ -1132,70 +1132,54 @@ Friend Module ModSecret
             Logger.Warn(ex, "读取本地授权码失败")
         End Try
 
+        '有授权码就立刻放行：联网校验放到后台，启动不再等待网络（原来要等约 0.8 秒）
+        '校验明确失败时置 LicenseInvalid，在「启动游戏」「联机」时再拦。
         If Key <> "" Then
-            '启动加速：本地缓存 6 小时内直接放行，联网校验放到后台静默刷新
-            If LicenseFresh() Then
-                Logger.Info("授权在本地缓存内有效，跳过启动时联网校验（后台静默刷新）")
-                Dim RefreshThread As New Threading.Thread(
-                    Sub()
-                        Dim R As Integer = 0
-                        Try
-                            Dim M As String = ""
-                            R = LicenseVerify(Key, M)
-                            If R = -1 Then
-                                Settings.Set("SystemLicenseKey", "")
-                                Logger.Warn($"后台授权校验被拒绝：{M}")
-                                RunInUiWait(Sub() Hint("授权码已失效，请重新输入", HintType.Red))
-                            ElseIf R = 1 Then
-                                Logger.Info("后台授权刷新通过")
-                            End If
-                        Catch ex As Exception
-                            Logger.Warn(ex, "后台授权刷新异常")
-                        End Try
-                    End Sub)
-                RefreshThread.IsBackground = True
-                RefreshThread.Start()
-                Return True
-            End If
-            'PCL 的 NetClient 禁止在 UI 线程发起非 127.x 的请求（ModNet:219），
-            '而本函数运行在 Application.OnStartup 的 UI 线程上。
-            '之前只在本机 127.0.0.1 测试，恰好命中它的 localhost 豁免，所以问题被掩盖。
-            '这里把网络请求放到后台线程执行，UI 线程阻塞等待，避免误判成「服务器不可达」。
-            Dim Result As Integer = 0
-            Dim Msg As String = ""
-            Dim Bg As New Threading.Thread(
-                Sub()
-                    Try
-                        Result = LicenseVerify(Key, Msg)
-                    Catch ex As Exception
-                        Logger.Warn(ex, "授权校验线程异常")
-                        Result = 0
-                    End Try
-                End Sub)
-            Bg.IsBackground = True
-            Bg.Start()
-            If Not Bg.Join(20000) Then
-                Logger.Warn("授权校验超时（20 秒）")
-                Result = 0
-            End If
-            Select Case Result
-                Case 1
-                    Logger.Info($"授权校验通过（设备 {GetDeviceId()}）")
-                    Return True
-                Case -1
-                    Logger.Warn($"授权被拒绝：{Msg}")
-                    Settings.Set("SystemLicenseKey", "")
-                    Key = ""
-                Case Else
-                    If LicenseWithinGrace() Then
-                        Logger.Info("授权服务器不可达，处于 7 天宽限期内，继续启动")
-                        Return True
-                    End If
-                    Logger.Warn("授权服务器不可达且已超出宽限期")
-            End Select
+            Logger.Info("授权校验转为后台进行，启动不再等待网络")
+            LicenseStartBackgroundVerify(Key)
+            Return True
         End If
 
+        '没有授权码：仍然要求当场输入
         Return ShowLicenseDialog(Key)
+    End Function
+
+    ''' <summary>后台校验一次授权，失败时把 LicenseInvalid 置位。</summary>
+    Friend Sub LicenseStartBackgroundVerify(Key As String)
+        Dim Bg As New Threading.Thread(
+            Sub()
+                Dim R As Integer = 0
+                Dim M As String = ""
+                Try
+                    R = LicenseVerify(Key, M)
+                Catch ex As Exception
+                    Logger.Warn(ex, "后台授权校验异常")
+                End Try
+                Select Case R
+                    Case 1
+                        LicenseInvalid = False
+                        Logger.Info("后台授权校验通过")
+                    Case -1
+                        LicenseInvalid = True
+                        Settings.Set("SystemLicenseKey", "")
+                        Logger.Warn($"后台授权校验被拒绝：{M}")
+                        RunInUiWait(Sub() Hint("授权码已失效，请在关于页重新输入", HintType.Red))
+                    Case Else
+                        Logger.Warn("授权服务器不可达，沿用本地宽限期策略")
+                End Select
+            End Sub)
+        Bg.IsBackground = True
+        Bg.Start()
+    End Sub
+
+    ''' <summary>授权是否已被判定为失效（后台校验明确拒绝时置位）。</summary>
+    Friend LicenseInvalid As Boolean = False
+
+    ''' <summary>执行敏感操作前的授权闸门。</summary>
+    Friend Function LicenseGateForAction() As Boolean
+        If Not LicenseInvalid Then Return True
+        RunInUiWait(Sub() Hint("授权码已失效，请重新输入后再试", HintType.Red))
+        Return False
     End Function
 
     ''' <summary>授权输入窗口。校验成功返回 True。</summary>
