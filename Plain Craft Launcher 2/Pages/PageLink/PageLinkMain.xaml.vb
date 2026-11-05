@@ -605,6 +605,9 @@ Public Class PageLinkMain
 
     '3. 启动联机模块
     Private Sub InitLaunch(Task As LoaderTask(Of Integer, Integer))
+        '先结束可能残留的联机模块：它加载着 WinDivert64.sys，
+        '文件被占用时覆盖会失败，表现为「解压联机模块失败 / 正由另一进程使用」。
+        ProcessStop()
         '解压文件
         UpdateLoadingPage("正在解压联机模块……", "解压联机模块")
         If FileUtils.Exists(PathEasyTier & "EasyTier.zip") Then
@@ -661,10 +664,63 @@ Public Class PageLinkMain
             Dim ExtractPath As String = RequestTaskTempFolder()
             FileUtils.ExtractToDirectory(PathEasyTier & "EasyTier.zip", ExtractPath,
                 progressHandler:=Sub(Percentage) Task.Progress = Percentage * 0.05)
-            DirectoryUtils.Copy(DirectoryUtils.EnumerateDirectories(ExtractPath, True).First, PathEasyTier)
-            '重命名
-            FileUtils.Move(PathEasyTier & "easytier-core.exe", PathEasyTier & "联机模块.exe")
-            FileUtils.Move(PathEasyTier & "easytier-cli.exe", PathEasyTier & "联机模块 CLI.exe")
+            '覆盖前再杀一遍：进程刚被杀掉时系统可能还没完全释放 WinDivert 驱动，
+            '所以这里带重试，6 次 × 400ms 足够驱动卸载完成。
+            Dim SourceDir As String = DirectoryUtils.EnumerateDirectories(ExtractPath, True).First
+            Dim CopyDone As Boolean = False
+            Dim LastError As Exception = Nothing
+            For Attempt As Integer = 1 To 6
+                Try
+                    DirectoryUtils.Copy(SourceDir, PathEasyTier)
+                    CopyDone = True
+                    Exit For
+                Catch ex As IO.IOException
+                    LastError = ex
+                    Logger.Warn(ex, $"解压联机模块第 {Attempt}/6 次失败，文件可能仍被占用，稍后重试")
+                    ProcessStop()
+                    Thread.Sleep(400)
+                Catch ex As UnauthorizedAccessException
+                    LastError = ex
+                    Logger.Warn(ex, $"解压联机模块第 {Attempt}/6 次失败（权限不足），稍后重试")
+                    ProcessStop()
+                    Thread.Sleep(400)
+                End Try
+            Next
+            If Not CopyDone Then
+                Logger.Error($"解压联机模块失败：{LastError?.Message}")
+                Panic("解压联机模块失败",
+                    $"无法把联机模块写入 {vbLQ}{PathEasyTier}{vbRQ}，里面的文件正被其他程序占用。{vbCrLf}{vbCrLf}" &
+                    $"最常见的原因是上一次的 {vbLQ}联机模块.exe{vbCrLf}联机模块 CLI.exe{vbRQ} 没有正常退出。请按顺序试：" & vbCrLf &
+                    $"1. 打开任务管理器，结束所有 {vbLQ}联机模块{vbRQ} 开头的进程；" & vbCrLf &
+                    $"2. 回到本页面重新点「启动」；" & vbCrLf &
+                    $"3. 如果仍然失败，重启电脑再试（WinDivert 驱动需要重启才会完全释放）。" & vbCrLf & vbCrLf &
+                    $"错误详情：{LastError?.Message}")
+                Return
+            End If
+            '重命名同样可能撞锁，一并重试
+            For Attempt As Integer = 1 To 6
+                Try
+                    If FileUtils.Exists(PathEasyTier & "easytier-core.exe") Then
+                        FileUtils.Move(PathEasyTier & "easytier-core.exe", PathEasyTier & "联机模块.exe")
+                    End If
+                    If FileUtils.Exists(PathEasyTier & "easytier-cli.exe") Then
+                        FileUtils.Move(PathEasyTier & "easytier-cli.exe", PathEasyTier & "联机模块 CLI.exe")
+                    End If
+                    Exit For
+                Catch ex As Exception
+                    LastError = ex
+                    Logger.Warn(ex, $"联机模块改名第 {Attempt}/6 次失败，稍后重试")
+                    ProcessStop()
+                    Thread.Sleep(400)
+                    If Attempt = 6 Then
+                        Panic("联机模块改名失败",
+                            $"没法把 easytier-core.exe 改名为 {vbLQ}联机模块.exe{vbRQ}，文件可能被占用。{vbCrLf}{vbCrLf}" &
+                            $"请结束任务管理器里 {vbLQ}联机模块{vbRQ} 开头的进程后重试，或重启电脑。{vbCrLf}{vbCrLf}" &
+                            $"错误详情：{ex.Message}")
+                        Return
+                    End If
+                End Try
+            Next
             '清理
             FileUtils.Delete(PathEasyTier & "EasyTier.zip")
             Settings.Set("LinkEasyTierVersion", ServerVersion)
@@ -940,6 +996,8 @@ ForcedPass:
                 Try
                     Logger.Info($"停止残留的联机模块，PID：{ProcessObject.Id}，进程名：{ProcessObject.ProcessName}")
                     ProcessObject.Kill()
+                    '必须等它真的退出：WinDivert64.sys 在进程消失后还要一小会儿才释放
+                    ProcessObject.WaitForExit(3000)
                     ProcessObject.Close()
                 Catch exx As Exception
                     Logger.Warn(exx, $"结束进程失败（{ProcessObject.ProcessName}，PID {ProcessObject.Id}）")
@@ -949,6 +1007,7 @@ ForcedPass:
             If ProcessCore IsNot Nothing AndAlso Not ProcessCore.HasExited Then
                 Logger.Info($"停止所启动的联机模块，PID：{ProcessCore.Id}")
                 ProcessCore.Kill()
+                ProcessCore.WaitForExit(3000)
                 ProcessCore.Close()
                 ProcessCore = Nothing
             End If
