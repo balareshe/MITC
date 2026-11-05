@@ -1,4 +1,4 @@
-﻿Imports System.Collections.ObjectModel
+Imports System.Collections.ObjectModel
 Imports System.Globalization
 Imports System.Net.Sockets
 Imports System.Reflection
@@ -97,44 +97,15 @@ Public Class PageLinkMain
     ''' 进入联机页面时的前置说明：点「继续」才申请管理员权限，点「算了」什么也不做。
     ''' </summary>
     Private Shared AdminNoticeShown As Boolean = False
+    ''' <summary>
+    ''' 进入联机页时给一次提醒：启动联机时 Windows 会请求管理员权限。
+    ''' 这里不再重启整个启动器——重启拿不到管理员令牌时会导致弹窗循环（见 482 的排查）。
+    ''' </summary>
     Private Sub CheckAdminOnEnter() Handles Me.PageEnter
-        If WindowsUtils.HasAdminRole() Then Return
-        '上次提权重启没能拿到管理员权限：本次会话不再弹窗，避免无限循环
-        If ModSecret.LinkElevationFailed Then Return
         If AdminNoticeShown Then Return
         AdminNoticeShown = True
-        RunInNewThread(
-            Sub()
-                Dim Choice As Integer = RunInUiWait(Function() MyMsgBox(
-                    $"联机功能需要管理员权限。{vbCrLf}{vbCrLf}" &
-                    $"创建虚拟网卡、写入防火墙规则都必须提权，否则联机模块会直接崩溃。{vbCrLf}{vbCrLf}" &
-                    $"点「继续」后，Windows 会弹出授权窗口，请选择「是」。" & vbCrLf &
-                    $"MITC 会自动以管理员权限重启，重启后直接进入本页面，无需再次点击。{vbCrLf}{vbCrLf}" &
-                    $"如果不想授权，点「算了」即可，其它功能不受影响。",
-                    "联机需要管理员权限", "继续", "算了", IsWarn:=True))
-                If Choice <> 1 Then
-                    Logger.Info("用户选择了「算了」，不申请管理员权限")
-                    Return
-                End If
-                Try
-                    '必须带 --wait：否则新实例会认为"已有 MITC 在运行"并立刻退出，
-                    '而旧实例同时也在退出，结果两个都没了。
-                    Logger.Info("用户选择「继续」，正在以管理员身份重启（--wait --link）")
-                    '关键：先关闭自己的日志文件再启动新实例，
-                    '否则新实例轮转 Log1.txt 会撞上这里的占用，误报「可能同时开启了多个程序」。
-                    Try
-                        TryCast(Logger.Instance, IDisposable)?.Dispose()
-                    Catch exx As Exception
-                    End Try
-                    Diagnostics.Process.Start(New Diagnostics.ProcessStartInfo(PathExe) With {.Verb = "runas", .Arguments = "--wait --link --elevation-attempt"})
-                Catch ex As Exception
-                    Logger.Warn(ex, "以管理员身份重启失败")
-                    RunInUiWait(Sub() Hint("未获得管理员授权，联机功能不可用"))
-                    Return
-                End Try
-                '新实例会在单实例互斥上最多等 10 秒，这里退出让出锁
-                RunInUiWait(Sub() FormMain.EndProgramForce(ProcessReturnValues.TaskDone))
-            End Sub, "联机权限检查")
+        If WindowsUtils.HasAdminRole() Then Return
+        Logger.Info("当前非管理员：启动联机时只对联机模块申请一次提权")
     End Sub
 
     Private Sub UpdatePanelVisibility() Handles Me.PageEnter
@@ -534,16 +505,8 @@ Public Class PageLinkMain
 
     '1. 获取服务器配置
     Private Sub InitConfig(Task As LoaderTask(Of Integer, Integer))
-        '管理员权限已在进入联机页面时检查过（见 CheckAdminOnEnter）；
-        '这里只做兜底：如果用户当时点了「算了」，真正创建/加入时直接拒绝，
-        '而不是让 EasyTier 跑起来之后崩在 tun device 上。
-        If Not WindowsUtils.HasAdminRole() Then
-            Throw New Exception(
-                $"$未授予管理员权限，无法启动联机模块。{vbCrLf}{vbCrLf}" &
-                $"重新进入「联机」页面并点「继续」，按提示授权即可。{vbCrLf}" &
-                $"也可以右键 MITC → 以管理员身份运行。" & vbCrLf &
-                $"或在 属性 → 兼容性 中勾选「以管理员身份运行此程序」，以后就不必每次授权。")
-        End If
+        '主程序本身不需要管理员权限：提权只发生在启动联机模块那一步（见 ProcessStart）。
+        '所以这里不再拦截非管理员。
 
         UpdateLoadingPage("正在联网获取配置……", "联网获取配置")
         '本修改版在 ModSecret.RefreshServerConfig 中自行填充 ServerConfig，
@@ -1026,6 +989,28 @@ ForcedPass:
 #Region "进程与日志"
 
     ''' <summary>
+    ''' 用提权的 taskkill 结束进程（会弹出一次 UAC）。用于结束以管理员身份运行的联机模块。
+    ''' </summary>
+    Private Shared Function KillElevated(Pid As Integer) As Boolean
+        Try
+            Dim Info As New ProcessStartInfo("cmd.exe", $"/c taskkill /F /PID {Pid}") With {
+                .UseShellExecute = True,
+                .Verb = "runas",
+                .WindowStyle = ProcessWindowStyle.Hidden,
+                .CreateNoWindow = True
+            }
+            Using P = Process.Start(Info)
+                P?.WaitForExit(10000)
+            End Using
+            Logger.Info($"已通过提权 taskkill 结束联机模块，PID：{Pid}")
+            Return True
+        Catch ex As Exception
+            Logger.Warn(ex, "提权结束联机模块失败（用户可能取消了 UAC）")
+            Return False
+        End Try
+    End Function
+
+    ''' <summary>
     ''' EasyTier Core 进程。
     ''' </summary>
     Private Shared ProcessCore As Process
@@ -1053,10 +1038,18 @@ ForcedPass:
             Next
             '关闭由自身启动的进程
             If ProcessCore IsNot Nothing AndAlso Not ProcessCore.HasExited Then
-                Logger.Info($"停止所启动的联机模块，PID：{ProcessCore.Id}")
-                ProcessCore.Kill()
-                ProcessCore.WaitForExit(3000)
-                ProcessCore.Close()
+                Dim StoppedPid As Integer = -1
+                Try : StoppedPid = ProcessCore.Id : Catch : End Try
+                Logger.Info($"停止所启动的联机模块，PID：{StoppedPid}")
+                Try
+                    ProcessCore.Kill()
+                    ProcessCore.WaitForExit(3000)
+                Catch exx As Exception
+                    '模块以管理员身份运行时，本程序无权结束它，退化为提权 taskkill（会弹一次 UAC）
+                    Logger.Warn(exx, "直接结束联机模块失败，尝试提权结束")
+                    If StoppedPid > 0 Then KillElevated(StoppedPid)
+                End Try
+                Try : ProcessCore.Close() : Catch : End Try
                 ProcessCore = Nothing
             End If
             '释放资源
@@ -1089,38 +1082,64 @@ ForcedPass:
     ''' 启动进程。
     ''' </summary>
     Private Sub ProcessStart(Arguments As String)
-        Dim Info = New ProcessStartInfo With {
-            .FileName = ModuleDir() & "联机模块.exe",
-            .Arguments = Arguments,
-            .UseShellExecute = False,
-            .CreateNoWindow = True,
-            .RedirectStandardError = True,
-            .RedirectStandardOutput = True,
-            .StandardOutputEncoding = Encoding.UTF8,
-            .StandardErrorEncoding = Encoding.UTF8
-        }
+        Dim ModulePath As String = ModuleDir() & "联机模块.exe"
         Logger.Info($"正在启动 EasyTier：{Arguments}")
-        ProcessCore = New Process With {.StartInfo = Info}
-        Dim LogLineHandler =
-        Sub(sender As Object, e As DataReceivedEventArgs, Handle As AutoResetEvent)
+        If WindowsUtils.HasAdminRole() Then
+            '已是管理员：直接启动并接管输出（原逻辑不变）
+            Dim Info = New ProcessStartInfo With {
+                .FileName = ModulePath,
+                .Arguments = Arguments,
+                .UseShellExecute = False,
+                .CreateNoWindow = True,
+                .RedirectStandardError = True,
+                .RedirectStandardOutput = True,
+                .StandardOutputEncoding = Encoding.UTF8,
+                .StandardErrorEncoding = Encoding.UTF8
+            }
+            ProcessCore = New Process With {.StartInfo = Info}
+            Dim LogLineHandler =
+            Sub(sender As Object, e As DataReceivedEventArgs, Handle As AutoResetEvent)
+                Try
+                    If e.Data Is Nothing Then
+                        Handle.[Set]()
+                        Return
+                    End If
+                    ProcessLogLine(e.Data)
+                Catch unused As ObjectDisposedException
+                Catch ex As Exception
+                    Logger.Warn(ex, "读取 EasyTier 信息失败")
+                End Try
+            End Sub
+            ProcessOutputHandle = New AutoResetEvent(False)
+            AddHandler ProcessCore.OutputDataReceived, Sub(sender, e) LogLineHandler(sender, e, ProcessOutputHandle)
+            ProcessErrorHandle = New AutoResetEvent(False)
+            AddHandler ProcessCore.ErrorDataReceived, Sub(sender, e) LogLineHandler(sender, e, ProcessErrorHandle)
+            ProcessCore.Start()
+            ProcessCore.BeginOutputReadLine()
+            ProcessCore.BeginErrorReadLine()
+        Else
+            '不是管理员：只对联机模块本身提权，主程序保持非管理员，不再重启自己
+            '代价：拿不到模块的 stdout/stderr 重定向，连接事件改为由 CLI 轮询驱动。
+            Logger.Info("当前非管理员，使用 runas 启动联机模块（会弹出一次 UAC）")
+            Dim Info As New ProcessStartInfo With {
+                .FileName = ModulePath,
+                .Arguments = Arguments,
+                .UseShellExecute = True,
+                .Verb = "runas",
+                .WindowStyle = ProcessWindowStyle.Hidden
+            }
+            ProcessCore = New Process With {.StartInfo = Info}
             Try
-                If e.Data Is Nothing Then
-                    Handle.[Set]()
-                    Return
-                End If
-                ProcessLogLine(e.Data)
-            Catch unused As ObjectDisposedException
+                ProcessCore.Start()
+                Dim StartedPid As Integer = -1
+                Try : StartedPid = ProcessCore.Id : Catch : End Try
+                Logger.Info($"联机模块已请求提权启动，PID：{StartedPid}")
             Catch ex As Exception
-                Logger.Warn(ex, "读取 EasyTier 信息失败")
+                ProcessCore = Nothing
+                Throw New Exception("未能获得管理员权限，联机模块无法启动。" & vbCrLf &
+                    "请在弹出的 UAC 窗口中点「是」；如果压根没看到弹窗，可以右键 MITC.exe 选择「以管理员身份运行」后再试。" & vbCrLf & vbCrLf & ex.Message, ex)
             End Try
-        End Sub
-        ProcessOutputHandle = New AutoResetEvent(False)
-        AddHandler ProcessCore.OutputDataReceived, Sub(sender, e) LogLineHandler(sender, e, ProcessOutputHandle)
-        ProcessErrorHandle = New AutoResetEvent(False)
-        AddHandler ProcessCore.ErrorDataReceived, Sub(sender, e) LogLineHandler(sender, e, ProcessErrorHandle)
-        ProcessCore.Start()
-        ProcessCore.BeginOutputReadLine()
-        ProcessCore.BeginErrorReadLine()
+        End If
     End Sub
     Private Sub ProcessLogLine(Line As String)
         '记录日志
