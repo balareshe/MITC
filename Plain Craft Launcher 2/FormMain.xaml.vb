@@ -235,6 +235,16 @@ Public Class FormMain
         End Sub, "初始化", ThreadPriority.Lowest)
 
         Logger.Info($"第三阶段加载用时：{GetTimeMs() - ApplicationStartTick} ms")
+        '提权没能成功：明确告诉用户原因，别让他反复点
+        If ModSecret.LinkElevationFailed Then
+            Try
+                RunInUiWait(Sub() Hint(
+                    "没能获得管理员权限（UAC 被取消或被系统策略阻止），联机功能本次不可用；其它功能不受影响。",
+                    HintType.Red))
+            Catch ex As Exception
+                Logger.Warn(ex, "提示提权失败时异常")
+            End Try
+        End If
         '提权重启过来时直接进联机页
         If StartupOpenLink Then
             StartupOpenLink = False

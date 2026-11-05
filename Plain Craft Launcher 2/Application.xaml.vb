@@ -36,6 +36,12 @@ Public Class Application
                 Environment.SetEnvironmentVariable("windir", Environment.GetEnvironmentVariable("SystemRoot"), EnvironmentVariableTarget.User)
                 Dim _unused As New FormattedText("", Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, Fonts.SystemTypefaces.First, 96, New MyColor, DPI)
             End Try
+            '带了 --elevation-attempt 却仍然不是管理员：说明 UAC 被取消或被策略阻止
+            If e.Args IsNot Nothing AndAlso e.Args.Any(Function(a) a = "--elevation-attempt") AndAlso
+               Not WindowsUtils.HasAdminRole() Then
+                ModSecret.LinkElevationFailed = True
+                Logger.Warn("提权重启后仍未获得管理员权限，本次会话不再提示提权")
+            End If
             '从「联机需要管理员权限」重启过来时，自动打开联机页
             If e.Args IsNot Nothing AndAlso e.Args.Any(Function(a) a = "--link") Then
                 FormMain.StartupOpenLink = True

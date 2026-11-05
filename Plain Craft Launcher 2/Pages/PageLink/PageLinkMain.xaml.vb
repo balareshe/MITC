@@ -99,6 +99,8 @@ Public Class PageLinkMain
     Private Shared AdminNoticeShown As Boolean = False
     Private Sub CheckAdminOnEnter() Handles Me.PageEnter
         If WindowsUtils.HasAdminRole() Then Return
+        '上次提权重启没能拿到管理员权限：本次会话不再弹窗，避免无限循环
+        If ModSecret.LinkElevationFailed Then Return
         If AdminNoticeShown Then Return
         AdminNoticeShown = True
         RunInNewThread(
@@ -107,7 +109,7 @@ Public Class PageLinkMain
                     $"联机功能需要管理员权限。{vbCrLf}{vbCrLf}" &
                     $"创建虚拟网卡、写入防火墙规则都必须提权，否则联机模块会直接崩溃。{vbCrLf}{vbCrLf}" &
                     $"点「继续」后，Windows 会弹出授权窗口，请选择「是」。" & vbCrLf &
-                    $"MITC 会自动以管理员权限重启，之后请重新点击「联机」。{vbCrLf}{vbCrLf}" &
+                    $"MITC 会自动以管理员权限重启，重启后直接进入本页面，无需再次点击。{vbCrLf}{vbCrLf}" &
                     $"如果不想授权，点「算了」即可，其它功能不受影响。",
                     "联机需要管理员权限", "继续", "算了", IsWarn:=True))
                 If Choice <> 1 Then
@@ -117,8 +119,14 @@ Public Class PageLinkMain
                 Try
                     '必须带 --wait：否则新实例会认为"已有 MITC 在运行"并立刻退出，
                     '而旧实例同时也在退出，结果两个都没了。
-                    Logger.Info("用户选择「继续」，正在以管理员身份重启（--wait）")
-                    Diagnostics.Process.Start(New Diagnostics.ProcessStartInfo(PathExe) With {.Verb = "runas", .Arguments = "--wait --link"})
+                    Logger.Info("用户选择「继续」，正在以管理员身份重启（--wait --link）")
+                    '关键：先关闭自己的日志文件再启动新实例，
+                    '否则新实例轮转 Log1.txt 会撞上这里的占用，误报「可能同时开启了多个程序」。
+                    Try
+                        TryCast(Logger.Instance, IDisposable)?.Dispose()
+                    Catch exx As Exception
+                    End Try
+                    Diagnostics.Process.Start(New Diagnostics.ProcessStartInfo(PathExe) With {.Verb = "runas", .Arguments = "--wait --link --elevation-attempt"})
                 Catch ex As Exception
                     Logger.Warn(ex, "以管理员身份重启失败")
                     RunInUiWait(Sub() Hint("未获得管理员授权，联机功能不可用"))

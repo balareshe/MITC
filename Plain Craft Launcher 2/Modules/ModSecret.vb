@@ -1175,6 +1175,12 @@ Friend Module ModSecret
     ''' <summary>授权是否已被判定为失效（后台校验明确拒绝时置位）。</summary>
     Friend LicenseInvalid As Boolean = False
 
+    ''' <summary>
+    ''' 提权重启后仍未拿到管理员权限（UAC 被取消/被策略阻止）。
+    ''' 置位后本次会话不再重复弹「联机需要管理员权限」。
+    ''' </summary>
+    Friend LinkElevationFailed As Boolean = False
+
     ''' <summary>执行敏感操作前的授权闸门。</summary>
     Friend Function LicenseGateForAction() As Boolean
         If Not LicenseInvalid Then Return True
