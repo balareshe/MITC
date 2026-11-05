@@ -1,4 +1,4 @@
-﻿<Window
+<Window
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:PCL"
@@ -115,7 +115,7 @@
                             <ColumnDefinition Width="1*" />
                         </Grid.ColumnDefinitions>
                         <Path x:Name="ShapeTitleLogo" Data="M6,30 V2 H15 L23,17 L31,2 H40 V30 H32 V12 L24,26 L16,12 V30 Z" SnapsToDevicePixels="False" UseLayoutRounding="False" IsHitTestVisible="False" HorizontalAlignment="Left" Margin="19,15.5,0,15.5" Stretch="fill" Stroke="White" StrokeThickness="2.2" Width="39" />
-                        <TextBlock x:Name="LabTitleLogo" Visibility="Collapsed" SnapsToDevicePixels="False" UseLayoutRounding="False" IsHitTestVisible="False" HorizontalAlignment="Left" Margin="52,0,0,0" Foreground="White" FontSize="19" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <TextBlock x:Name="LabTitleLogo" Visibility="Collapsed" SnapsToDevicePixels="False" UseLayoutRounding="False" IsHitTestVisible="False" HorizontalAlignment="Left" Margin="18,0,0,0" Foreground="White" FontSize="19" FontWeight="SemiBold" VerticalAlignment="Center" />
                         <local:MyImage x:Name="ImageTitleLogo" SnapsToDevicePixels="False" UseLayoutRounding="False" IsHitTestVisible="False" HorizontalAlignment="Left" Margin="18,0,0,0" Width="26" Height="26" Stretch="Uniform" VerticalAlignment="Center" Visibility="Collapsed" />
                         <StackPanel Grid.Column="1" x:Name="PanTitleSelect" HorizontalAlignment="Left" Height="27" VerticalAlignment="Center" Orientation="Horizontal" Margin="13,0">
                             <local:MyRadioButton x:Name="BtnTitleSelect0" Text="启动" Tag="0" Margin="5,0" Checked="True" Padding="2,0"

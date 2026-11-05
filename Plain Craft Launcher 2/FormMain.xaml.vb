@@ -538,13 +538,7 @@ Public Class FormMain
             Case 1 '默认
                 ShapeTitleLogo.Visibility = Visibility.Collapsed
                 LabTitleLogo.Visibility = Visibility.Visible
-                ImageTitleLogo.Visibility = Visibility.Visible
-                '默认显示内置图标 + 文字；用户自定义 Logo 时走 Case 3
-                Try
-                    ImageTitleLogo.Source = "pack://application:,,,/images/icon.ico"
-                Catch ex As Exception
-                    Logger.Warn(ex, "加载标题栏图标失败")
-                End Try
+                ImageTitleLogo.Visibility = Visibility.Collapsed
                 If Not IsNothing(FrmSetupUI) Then
                     FrmSetupUI.CheckLogoLeft.Visibility = Visibility.Collapsed
                     FrmSetupUI.PanLogoText.Visibility = Visibility.Collapsed
