@@ -34,6 +34,13 @@ Public Class PageLinkMain
     End Function
 
     Private Const INVITE_CODE_VERSION As Integer = 3
+
+''' <summary>
+''' 房间名前缀。**这个值和中继的 --relay-network-whitelist 是一对**：
+''' 中继目前只转发 PCLB-* 的网络，改成别的前缀会让所有房间被中继立刻断开。
+''' 要改前缀，必须先在两个中继上改白名单并重启，再发客户端。
+''' </summary>
+Private Const NET_PREFIX As String = "PCLB-"
     'PCLB-P{4位端口hex}-{5位随机}  =>  16 字符
     Private Const CODE_NAME_LEN As Integer = 16
     'PCLB-Pxxxx-yyyyy-sssss-vvddd  =>  28 字符
@@ -156,10 +163,11 @@ Public Class PageLinkMain
             Next
             Return Result.Replace("O", "0").Replace("I", "1")
         End Function
-        '前缀 PCLB- 是给中继白名单认的：中继只给 PCLB-* 开头的网络转发，
+        '前缀是给中继白名单认的：中继只给 PCLB-* 开头的网络转发，
         '别人随便起的名字用不了我们的中继。前缀用大写 P 开头，
         '这样过渡期旧的 P* 白名单也还能匹配。
-        NetworkName = $"MITCB-P{ServerPort.ConvertRadix(16).PadLeft(4, "0"c)}-{GenerateRandomCode()}"
+        '房间名固定 16 字符：PCLB-P{4hex}-{5rand}，配合邀请码的 28 字符格式。
+        NetworkName = $"{NET_PREFIX}P{ServerPort.ConvertRadix(16).PadLeft(4, "0"c)}-{GenerateRandomCode()}"
         NetworkSecret = GenerateRandomCode()
         DiscoverNodeID = -1
         Logger.Info($"尝试创建房间，网络名 {NetworkName}，网络密码 {NetworkSecret}，端口 {ServerPort}")
@@ -214,7 +222,7 @@ Public Class PageLinkMain
         If Code Is Nothing Then Return "邀请码为空！"
         Code = FixCodeFormat(Code)
         '判断类型
-        If Not (Code.Length = CODE_TOTAL_LEN AndAlso Code.StartsWithF("MITCB-") AndAlso
+        If Not (Code.Length = CODE_TOTAL_LEN AndAlso Code.StartsWithF(NET_PREFIX) AndAlso
                 Code(4) = "-"c AndAlso Code(10) = "-"c AndAlso Code(16) = "-"c AndAlso Code(22) = "-"c) Then
             If Code.StartsWithF("U/") Then 'HMCL
                 Return "请让房主使用 MITC 创建房间！"
@@ -222,7 +230,7 @@ Public Class PageLinkMain
                 Return "请让房主使用非社区版的 MITC 创建房间！"
             ElseIf Code.Length = 23 AndAlso Code(0) = "P"c AndAlso Code(11) = "-"c Then
                 '旧格式（没有 PCLB- 前缀）
-                Return "这是旧版邀请码。请双方都升级到最新版 MITC 后再联机——新版房间名带 MITCB- 前缀，中继只给这种房间转发。"
+                Return $"这是旧版邀请码。请双方都升级到最新版 MITC 后再联机——新版房间名带 {NET_PREFIX} 前缀，中继只给这种房间转发。"
             Else
                 Return "邀请码有误，请让房主使用 MITC 创建房间！"
             End If
