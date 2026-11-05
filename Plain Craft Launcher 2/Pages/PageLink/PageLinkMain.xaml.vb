@@ -784,10 +784,13 @@ Public Class PageLinkMain
         Task.Progress = 0.13
         '获取空闲端口
         UpdateLoadingPage("正在启动联机模块……", "启动联机模块")
-        Dim FreePorts = FindFreePorts(5, ServerPort)
+        'EasyTier 从 --listeners 的端口开始实际会占用 4 个连续端口
+        '（实测 41231→tcp/udp、41232→wg/ws、41233→quic/wss、41234→faketcp），
+        '所以这里预留 6 个：Client(0)、RPC(1)、Listeners(2..5)。
+        Dim FreePorts = FindFreePorts(6, ServerPort)
         ClientPort = FreePorts(0)
         RPCPort = FreePorts(1)
-        Dim ListenersPort As Integer = FreePorts(2) '它会占用【当前、当前 +1、当前 +2】共三个端口
+        Dim ListenersPort As Integer = FreePorts(2) '它会占用【当前 .. 当前 +3】共四个端口
         '获取启动参数
         Dim Arguments As String = ServerConfig("Link")("Argument")
         Arguments += $" --network-name={NetworkName} --network-secret={NetworkSecret} --listeners {ListenersPort} --rpc-portal {RPCPort} --private-mode true"
