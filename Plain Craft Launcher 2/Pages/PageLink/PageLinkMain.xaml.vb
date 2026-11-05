@@ -1190,7 +1190,10 @@ ForcedPass:
             Dim QuoteMark As String = Chr(34)
             Dim EscapedExe As String = QuoteMark & ModulePath & QuoteMark
             Dim EscapedLog As String = QuoteMark & ModuleLogPath & QuoteMark
-            Dim CmdArgs As String = $"/c {EscapedExe} {Arguments} > {EscapedLog} 2>&1"
+            'cmd /c 的字符串以引号开头时，它的解析规则会吃掉首尾引号，导致整条命令失效
+            '（实测：/c "exe" args > "log" 退出码 1、日志不生成）。
+            '必须用 /s /c 并把整条命令再包一层引号：/s /c ""exe" args > "log" 2>&1"
+            Dim CmdArgs As String = $"/s /c {QuoteMark}{EscapedExe} {Arguments} > {EscapedLog} 2>&1{QuoteMark}"
             Dim Info As New ProcessStartInfo("cmd.exe", CmdArgs) With {
                 .UseShellExecute = True,
                 .Verb = "runas",
