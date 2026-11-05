@@ -56,11 +56,11 @@
                             </Grid.ColumnDefinitions>
                             <local:MyComboBox x:Name="ComboArgumentJava" local:SettingService.Key="VersionArgumentJavaV2">
                                 <local:MyComboBoxItem Content="自动选择"
-                                                  ToolTip="由 PCL 自动分析需要的 Java 版本，如果没有合适的 Java 则自动下载。" />
+                                                  ToolTip="由 MITC 自动分析需要的 Java 版本，如果没有合适的 Java 则自动下载。" />
                                 <local:MyComboBoxItem Content="自动选择指定版本的 Java" 
-                                                  ToolTip="手动输入一个 Java 版本范围，PCL 将选择符合该范围的 Java，如果没有合适的 Java 则自动下载。&#xa;适合部分 Mod 需要特定 Java 版本才能启动的情况。" />
+                                                  ToolTip="手动输入一个 Java 版本范围，MITC 将选择符合该范围的 Java，如果没有合适的 Java 则自动下载。&#xa;适合部分 Mod 需要特定 Java 版本才能启动的情况。" />
                                 <local:MyComboBoxItem Content="使用版本文件夹中的 Java"
-                                                  ToolTip="手动在当前版本的文件夹中放置 Java 后，PCL 将自动搜索并使用该 Java。&#xa;适合整合包自带 Java 的情况。" />
+                                                  ToolTip="手动在当前版本的文件夹中放置 Java 后，MITC 将自动搜索并使用该 Java。&#xa;适合整合包自带 Java 的情况。" />
                                 <local:MyComboBoxItem Content="使用指定的 Java"
                                                   ToolTip="手动指定所使用的 Java 的绝对路径。&#xa;若将该版本打包到其他电脑，此设置可能会失效。" />
                             </local:MyComboBox>

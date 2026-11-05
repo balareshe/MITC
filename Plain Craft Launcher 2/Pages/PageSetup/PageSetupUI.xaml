@@ -64,7 +64,7 @@
                             <local:MyRadioBox local:SettingService.Key="UiLauncherTheme" local:SettingService.Value="4" 
                                               Grid.Column="5" Grid.Row="0" Text="橡木棕" x:Name="RadioLauncherTheme4" />
                         </Grid>
-                        <local:MyCheckBox local:SettingService.Key="UiLauncherLogo" Text="打开启动器时显示 PCL 图标" Margin="-1,0,0,1" Height="22" />
+                        <local:MyCheckBox local:SettingService.Key="UiLauncherLogo" Text="打开启动器时显示 MITC 图标" Margin="-1,0,0,1" Height="22" />
                     </StackPanel>
                     <Border Background="#DDDDDDDD" Margin="-8,23,-5,28" CornerRadius="4" Name="PanLauncherHide" Visibility="Collapsed">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -114,7 +114,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Text="背景模糊" Margin="0,0,25,0" />
                         <local:MySlider local:SettingService.Key="UiBackgroundBlur" x:Name="SliderBackgroundBlur" MaxValue="40" Grid.Column="1" 
-                                        ToolTip="高度的模糊会严重掉帧，请谨慎。&#13;不建议在制作整合包时开启模糊，以确保 PCL 在低性能电脑上可以流畅运行。" />
+                                        ToolTip="高度的模糊会严重掉帧，请谨慎。&#13;不建议在制作整合包时开启模糊，以确保 MITC 在低性能电脑上可以流畅运行。" />
                     </Grid>
                     <local:MyCheckBox local:SettingService.Key="UiBackgroundColorful" Text="叠加彩色背景" Margin="-1,0,0,8" Height="22" />
                     <Grid Height="35" Margin="0,2,0,0">
