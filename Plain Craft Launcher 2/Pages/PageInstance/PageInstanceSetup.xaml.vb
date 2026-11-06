@@ -344,11 +344,33 @@ PreFin:
 
     '全局
     Private ComboServerLoginLast As Integer
+    ''' <summary>正在自动填入 LittleSkin 的认证服务器，避免重入本方法。</summary>
+    Private SuppressLoginServerAutoFill As Boolean
     Private Sub ComboServerLogin_Changed() Handles ComboServerLogin.SelectionChanged, TextServerNide.ValidatedTextChanged, TextServerAuthServer.ValidatedTextChanged, TextServerAuthRegister.ValidatedTextChanged
         If AniControlEnabled <> 0 Then Return
         UpdateServerLoginUI()
         '检查是否输入正确，正确才触发设置改变
         If ComboServerLogin.SelectedIndex = 3 AndAlso Not TextServerNide.IsValidated Then Return
+        '选了「Authlib Injector 或 LittleSkin」但认证服务器还空着时，默认填 LittleSkin。
+        '原来这里会直接返回，下拉框看着选中了、设置却没保存，用户以为坏了。
+        If Not SuppressLoginServerAutoFill AndAlso ComboServerLogin.SelectedIndex = 4 AndAlso String.IsNullOrWhiteSpace(TextServerAuthServer.Text.Trim()) Then
+            SuppressLoginServerAutoFill = True
+            Try
+                TextServerAuthServer.Text = "https://littleskin.cn/api/yggdrasil"
+                If String.IsNullOrWhiteSpace(TextServerAuthRegister.Text.Trim()) Then TextServerAuthRegister.Text = "https://littleskin.cn/auth/register"
+                If String.IsNullOrWhiteSpace(TextServerAuthName.Text.Trim()) Then TextServerAuthName.Text = "LittleSkin 登录"
+                Settings.Set("VersionServerLogin", 4, Instance:=PageInstanceLeft.Instance)
+                Settings.Set("VersionServerAuthServer", "https://littleskin.cn/api/yggdrasil", Instance:=PageInstanceLeft.Instance)
+                Settings.Set("VersionServerAuthRegister", "https://littleskin.cn/auth/register", Instance:=PageInstanceLeft.Instance)
+                Settings.Set("VersionServerAuthName", "LittleSkin 登录", Instance:=PageInstanceLeft.Instance)
+                ComboServerLoginLast = 4
+            Finally
+                SuppressLoginServerAutoFill = False
+            End Try
+            UpdateServerLoginUI()
+            Hint("已填入 LittleSkin 的认证服务器，如果需要其它皮肤站可以在下方修改。", HintType.Blue)
+            Return
+        End If
         If ComboServerLogin.SelectedIndex = 4 AndAlso Not TextServerAuthServer.IsValidated Then Return
         '检查结果是否发生改变，未改变则不触发设置改变
         If ComboServerLoginLast = ComboServerLogin.SelectedIndex Then Return
