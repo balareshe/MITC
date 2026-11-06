@@ -1,17 +1,55 @@
-# Plain Craft Launcher
+# PCL MITC
 
-[![Stars](https://img.shields.io/github/stars/Meloong-Git/PCL?style=flat&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiI+PHBhdGggZD0iTTggLjI1YS43NS43NSAwIDAgMSAuNjczLjQxOGwxLjg4MiAzLjgxNSA0LjIxLjYxMmEuNzUuNzUgMCAwIDEgLjQxNiAxLjI3OWwtMy4wNDYgMi45Ny43MTkgNC4xOTJhLjc1MS43NTEgMCAwIDEtMS4wODguNzkxTDggMTIuMzQ3bC0zLjc2NiAxLjk4YS43NS43NSAwIDAgMS0xLjA4OC0uNzlsLjcyLTQuMTk0TC44MTggNi4zNzRhLjc1Ljc1IDAgMCAxIC40MTYtMS4yOGw0LjIxLS42MTFMNy4zMjcuNjY4QS43NS43NSAwIDAgMSA4IC4yNVoiIGZpbGw9IiNlYWM1NGYiLz48L3N2Zz4=&logoSize=auto&label=Stars&labelColor=444444&color=eac54f)](https://github.com/Meloong-Git/PCL/)
-[![Issues](https://img.shields.io/github/issues/Meloong-Git/PCL?style=flat&label=Issues&labelColor=444444&color=1F883D)](https://github.com/Meloong-Git/PCL/issues)
-[![哔哩哔哩](https://img.shields.io/badge/动态-BiliBili-00A4DB?style=flat&labelColor=444444&logoSize=auto)](https://space.bilibili.com/11343203/dynamic)
-[![爱发电](https://img.shields.io/badge/赞助-爱发电-946ce6?style=flat&labelColor=444444&logoSize=auto)](https://meloong.com/afd/a/LTCat)
+**PCL MITC 是一个基于 [Plain Craft Launcher 2](https://github.com/Meloong-Git/PCL) 2.13.0.1 的第三方修改版启动器。**
 
-包含 PCL 的大部分源代码，包括 UI 库、动画模块、下载模块、Minecraft 启动模块等！<br/>
-代码并不是实时更新的，它会在每次 PCL 发布更新时同步一次。<br/>
-非常感谢社区的大力支持！
+本仓库是**非官方**的第三方二次创作产物，与龙腾猫跃及 PCL 官方没有任何隶属、授权或认可关系。
 
-<br/>
+---
 
-### 相关资源
-- [PCL 下载](https://meloong.com/afd/p/0164034c016c11ebafcb52540025c377)：下载可免费使用的正式版 PCL！
-- [PCL 功能投票](https://github.com/Meloong-Git/PCL/discussions/2)：来参加投票吧，开发者会优先处理票数较高的项目！
-- [帮助文档库](https://github.com/LTCatt/PCL2Help)：PCL 内置帮助文档的存储库
+## 这是什么
+
+- 基线：PCL 2.13.0.1（commit `5b05f87`）
+- 形态：VB.NET / WPF / .NET Framework 4.8 的桌面启动器
+- 命名：按《PCL 存储库合理使用指南》重度使用第 2 条，名称以 `PCL` 开头，`MITC` 为后缀标识
+
+## 相对上游做了什么
+
+| 方面 | 说明 |
+|---|---|
+| 更新通道 | 自建 OTA 服务端（版本、公告、联机节点、联机模块），全部签名校验 |
+| 联机 | 恢复上游开源版被移除的 EasyTier 联机流程，改用自建中继与房间名前缀 |
+| 授权 | 增加授权码校验（人工审核发放），用于控制分发范围 |
+| 界面 | 移除启动动画与部分个性化开关，标题栏字标重绘 |
+| 品牌 | 全量改名为 PCL MITC（数据目录、授权码前缀等内部标识保持不变） |
+
+下载与授权申请：<https://pcl.umrca.com/>
+
+> 使用本版本需要一个经人工审核发放的授权码，不是下载即用。
+
+## 许可证与合规
+
+本仓库保留上游的 [`LICENCE`](LICENCE)（《PCL 分发有限许可》与《PCL 存储库合理使用指南》），并按该指南的重度使用条款执行：
+
+1. 明确声明这是第三方基于 PCL 的独立二次创作产物；
+2. 名称以 `Plain Craft Launcher (PCL)` 开头并带第三方修改后缀；
+3. 关于页首位给出龙腾猫跃的署名与赞助链接，公开源代码，继续使用原许可文件；
+4. 保留与 `McLaunchPrecheck` 一致的 Minecraft 正版购买劝导；
+5. 不提供与赞助解锁类似的功能（界面主要色相保持蓝色）。
+
+除本许可明确授予的权利外，相关知识产权仍归原开发者所有。
+
+## 关于上游
+
+本仓库不是 PCL 官方源码仓库。上游项目地址：
+
+- 源代码：<https://github.com/Meloong-Git/PCL>
+- 官方网站：<https://meloong.com/PCL>
+- 帮助文档库：<https://github.com/LTCatt/PCL2Help>
+
+## 鸣谢
+
+- 龙腾猫跃：Plain Craft Launcher 的作者
+- bangbang93：BMCLAPI 镜像源与 Forge 安装支持
+- 以及上游 `LICENCE` 与关于页中列出的全部第三方项目
+
+完整鸣谢见启动器内「更多 → 关于与鸣谢」。
