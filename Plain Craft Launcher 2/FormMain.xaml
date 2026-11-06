@@ -116,8 +116,8 @@
                         </Grid.ColumnDefinitions>
                         <Path x:Name="ShapeTitleLogo" Data="M6,30 V2 H15 L23,17 L31,2 H40 V30 H32 V12 L24,26 L16,12 V30 Z" SnapsToDevicePixels="False" UseLayoutRounding="False" IsHitTestVisible="False" HorizontalAlignment="Left" Margin="19,15.5,0,15.5" Stretch="fill" Stroke="White" StrokeThickness="2.2" Width="39" />
                         <StackPanel x:Name="BorTitleLogo" Orientation="Horizontal" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="18,0,0,0" IsHitTestVisible="False">
-                            <TextBlock x:Name="LabTitleBase" Text="PCL" VerticalAlignment="Center" Foreground="White" FontSize="19" FontWeight="SemiBold" IsHitTestVisible="False" SnapsToDevicePixels="False" UseLayoutRounding="False" />
-                            <TextBlock x:Name="LabTitleLogo" Margin="10,0,0,0" VerticalAlignment="Center" Foreground="White" FontSize="19" FontWeight="SemiBold" IsHitTestVisible="False" SnapsToDevicePixels="False" UseLayoutRounding="False" />
+                            <TextBlock x:Name="LabTitleBase" Text="PCL-" VerticalAlignment="Center" Foreground="White" FontSize="19" FontWeight="SemiBold" IsHitTestVisible="False" SnapsToDevicePixels="False" UseLayoutRounding="False" />
+                            <TextBlock x:Name="LabTitleLogo" Margin="0" VerticalAlignment="Center" Foreground="White" FontSize="19" FontWeight="SemiBold" IsHitTestVisible="False" SnapsToDevicePixels="False" UseLayoutRounding="False" />
                         </StackPanel>
                         <local:MyImage x:Name="ImageTitleLogo" SnapsToDevicePixels="False" UseLayoutRounding="False" IsHitTestVisible="False" HorizontalAlignment="Left" Margin="18,0,0,0" Width="26" Height="26" Stretch="Uniform" VerticalAlignment="Center" Visibility="Collapsed" />
                         <StackPanel Grid.Column="1" x:Name="PanTitleSelect" HorizontalAlignment="Left" Height="27" VerticalAlignment="Center" Orientation="Horizontal" Margin="13,0">
