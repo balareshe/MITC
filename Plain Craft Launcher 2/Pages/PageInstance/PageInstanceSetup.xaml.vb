@@ -54,6 +54,11 @@
 
             '服务器
             ComboServerLogin.SelectedIndex = Settings.Get(Of Integer)("VersionServerLogin", Instance:=PageInstanceLeft.Instance)
+            '存的是「Authlib」类型、且认证服务器就是 LittleSkin 时，显示成 LittleSkin 那一项
+            If ComboServerLogin.SelectedIndex = 4 AndAlso
+               Settings.Get(Of String)("VersionServerAuthServer", Instance:=PageInstanceLeft.Instance).Trim().TrimEnd("/"c) = LittleSkinAuthServer Then
+                ComboServerLogin.SelectedIndex = LoginTypeLittleSkin
+            End If
             ComboServerLoginLast = ComboServerLogin.SelectedIndex
             UpdateServerLoginUI()
 
@@ -344,16 +349,38 @@ PreFin:
 
     '全局
     Private ComboServerLoginLast As Integer
+    ''' <summary>「第三方登录：LittleSkin（一键预设）」在下拉里的序号。</summary>
+    Private Const LoginTypeLittleSkin As Integer = 5
+    ''' <summary>认证服务器指向 LittleSkin 时的标准地址。</summary>
+    Private Const LittleSkinAuthServer As String = "https://littleskin.cn/api/yggdrasil"
     ''' <summary>正在自动填入 LittleSkin 的认证服务器，避免重入本方法。</summary>
     Private SuppressLoginServerAutoFill As Boolean
+
+    ''' <summary>把下拉序号换算成真正存进 VersionServerLogin 的登录类型（LittleSkin 预设项按 Authlib 处理）。</summary>
+    Private Function LoginTypeIndex() As Integer
+        Return If(ComboServerLogin.SelectedIndex = LoginTypeLittleSkin, 4, ComboServerLogin.SelectedIndex)
+    End Function
     Private Sub ComboServerLogin_Changed() Handles ComboServerLogin.SelectionChanged, TextServerNide.ValidatedTextChanged, TextServerAuthServer.ValidatedTextChanged, TextServerAuthRegister.ValidatedTextChanged
         If AniControlEnabled <> 0 Then Return
         UpdateServerLoginUI()
         '检查是否输入正确，正确才触发设置改变
         If ComboServerLogin.SelectedIndex = 3 AndAlso Not TextServerNide.IsValidated Then Return
+        '如果当前显示的是 LittleSkin 预设项，但用户把认证服务器改成了别的地址，就退回普通的 Authlib 项
+        If Not SuppressLoginServerAutoFill AndAlso ComboServerLogin.SelectedIndex = LoginTypeLittleSkin Then
+            Dim EditedServer As String = TextServerAuthServer.Text.Trim().TrimEnd("/"c)
+            If EditedServer <> "" AndAlso EditedServer <> LittleSkinAuthServer Then
+                SuppressLoginServerAutoFill = True
+                Try
+                    ComboServerLogin.SelectedIndex = 4
+                Finally
+                    SuppressLoginServerAutoFill = False
+                End Try
+            End If
+        End If
         '选了「Authlib Injector 或 LittleSkin」但认证服务器还空着时，默认填 LittleSkin。
         '原来这里会直接返回，下拉框看着选中了、设置却没保存，用户以为坏了。
-        If Not SuppressLoginServerAutoFill AndAlso ComboServerLogin.SelectedIndex = 4 AndAlso String.IsNullOrWhiteSpace(TextServerAuthServer.Text.Trim()) Then
+        If Not SuppressLoginServerAutoFill AndAlso LoginTypeIndex() = 4 AndAlso
+           (ComboServerLogin.SelectedIndex = LoginTypeLittleSkin OrElse String.IsNullOrWhiteSpace(TextServerAuthServer.Text.Trim())) Then
             SuppressLoginServerAutoFill = True
             Try
                 TextServerAuthServer.Text = "https://littleskin.cn/api/yggdrasil"
@@ -371,16 +398,16 @@ PreFin:
             Hint("已填入 LittleSkin 的认证服务器，如果需要其它皮肤站可以在下方修改。", HintType.Blue)
             Return
         End If
-        If ComboServerLogin.SelectedIndex = 4 AndAlso Not TextServerAuthServer.IsValidated Then Return
+        If LoginTypeIndex() = 4 AndAlso Not TextServerAuthServer.IsValidated Then Return
         '检查结果是否发生改变，未改变则不触发设置改变
         If ComboServerLoginLast = ComboServerLogin.SelectedIndex Then Return
         '触发
         ComboServerLoginLast = ComboServerLogin.SelectedIndex
-        Settings.Set("VersionServerLogin", ComboServerLogin.SelectedIndex, Instance:=PageInstanceLeft.Instance)
+        Settings.Set("VersionServerLogin", LoginTypeIndex(), Instance:=PageInstanceLeft.Instance)
     End Sub
     Private Sub UpdateServerLoginUI()
         If LabServerNide Is Nothing Then Return
-        Dim Type = ComboServerLogin.SelectedIndex
+        Dim Type = LoginTypeIndex()
         LabServerNide.Visibility = If(Type = 3, Visibility.Visible, Visibility.Collapsed)
         TextServerNide.Visibility = If(Type = 3, Visibility.Visible, Visibility.Collapsed)
         PanServerNide.Visibility = If(Type = 3, Visibility.Visible, Visibility.Collapsed)
