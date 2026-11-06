@@ -591,7 +591,12 @@ Public Class FormMain
         End Select
         FrmSetupUI?.CardLogo.TriggerForceResize()
         '标题栏文本
-        LabTitleLogo.Text = If(String.IsNullOrWhiteSpace(Settings.Get(Of String)("UiLogoText")), "PCL MITC", Settings.Get(Of String)("UiLogoText"))
+        '白框里只放后缀（默认 MITC），PCL 两个字母由 LabTitleBase 固定显示。
+        '498 把默认值写成了 PCL MITC，这里剥掉前缀，避免显示成 PCL [PCL MITC]。
+        Dim LogoText As String = If(String.IsNullOrWhiteSpace(Settings.Get(Of String)("UiLogoText")), "MITC", Settings.Get(Of String)("UiLogoText")).Trim()
+        If LogoText.StartsWithF("PCL MITC", True) Then LogoText = LogoText.Substring(8).Trim()
+        If LogoText.StartsWithF("PCL ", True) Then LogoText = LogoText.Substring(4).Trim()
+        LabTitleLogo.Text = If(LogoText = "", "MITC", LogoText)
         '标题栏文本是否居左
         PanTitleMain.ColumnDefinitions(0).Width = New GridLength(If(Settings.Get(Of Boolean)("UiLogoLeft") AndAlso Settings.Get(Of Integer)("UiLogoType") = 0, 0, 1), GridUnitType.Star)
     End Sub
