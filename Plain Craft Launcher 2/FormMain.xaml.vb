@@ -767,9 +767,12 @@ Public Class FormMain
                         End If
                         If AuthlibServer = "https://littleskin.cn/api/yggdrasil" Then
                             'LittleSkin
-                            If MyMsgBox($"是否要在版本 {Target.Name} 中开启 LittleSkin 登录？" & vbCrLf &
-                                        "你可以在 版本设置 → 设置 → 服务器选项 中修改登录方式。", "第三方登录开启确认", "确定", "取消") = 2 Then
-                                Return
+                            If AuthlibDropAcceptedServer <> AuthlibServer Then
+                                If MyMsgBox($"是否要在版本 {Target.Name} 中开启 LittleSkin 登录？" & vbCrLf &
+                                            "你可以在 版本设置 → 设置 → 服务器选项 中修改登录方式。", "第三方登录开启确认", "确定", "取消") = 2 Then
+                                    Return
+                                End If
+                                AuthlibDropAcceptedServer = AuthlibServer
                             End If
                             Settings.Set("VersionServerLogin", 4, Instance:=Target)
                             Settings.Set("VersionServerAuthServer", "https://littleskin.cn/api/yggdrasil", Instance:=Target)
@@ -777,10 +780,13 @@ Public Class FormMain
                             Settings.Set("VersionServerAuthName", "LittleSkin 登录", Instance:=Target)
                         Else
                             '第三方 Authlib 服务器
-                            If MyMsgBox($"是否要在版本 {Target.Name} 中开启第三方登录？" & vbCrLf &
-                                        $"登录服务器：{AuthlibServer}" & vbCrLf & vbCrLf &
-                                        "你可以在 版本设置 → 设置 → 服务器选项 中修改登录方式。", "第三方登录开启确认", "确定", "取消") = 2 Then
-                                Return
+                            If AuthlibDropAcceptedServer <> AuthlibServer Then
+                                If MyMsgBox($"是否要在版本 {Target.Name} 中开启第三方登录？" & vbCrLf &
+                                            $"登录服务器：{AuthlibServer}" & vbCrLf & vbCrLf &
+                                            "你可以在 版本设置 → 设置 → 服务器选项 中修改登录方式。", "第三方登录开启确认", "确定", "取消") = 2 Then
+                                    Return
+                                End If
+                                AuthlibDropAcceptedServer = AuthlibServer
                             End If
                             Settings.Set("VersionServerLogin", 4, Instance:=Target)
                             Settings.Set("VersionServerAuthServer", AuthlibServer, Instance:=Target)
@@ -1080,6 +1086,9 @@ Public Class FormMain
     ''' 启动后是否自动打开联机页（由 --link 参数设置）。
     ''' </summary>
     Public Shared StartupOpenLink As Boolean = False
+
+    ''' <summary>本次运行内已确认过的 Authlib 拖拽服务器，同一个不再重复弹窗。</summary>
+    Private Shared AuthlibDropAcceptedServer As String = Nothing
     Public PageCurrent As PageStackData = PageType.Launch
     ''' <summary>
     ''' 上一个主页面。

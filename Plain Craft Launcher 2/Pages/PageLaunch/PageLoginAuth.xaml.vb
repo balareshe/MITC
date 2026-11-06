@@ -22,6 +22,8 @@
             End If
         End If
         IsFirstLoad = False
+        '切换版本时认证服务器可能变了，同步刷新注册/快捷按钮
+        ReloadRegisterButton()
     End Sub
     ''' <summary>
     ''' 获取当前页面的登录信息。
@@ -81,6 +83,32 @@
     Private Sub ReloadRegisterButton() Handles Me.Loaded
         Dim Address As String = If(McInstanceSelected IsNot Nothing, Settings.Get(Of String)("VersionServerAuthRegister", Instance:=McInstanceSelected), Settings.Get(Of String)("CacheAuthServerRegister"))
         BtnLink.Visibility = If(String.IsNullOrEmpty(New ValidateHttp().Validate(Address)), Visibility.Visible, Visibility.Collapsed)
+        '没有配置认证服务器时，给一个一键切到 LittleSkin 的入口
+        BtnUseLittleSkin.Visibility = If(CurrentAuthServer() = "", Visibility.Visible, Visibility.Collapsed)
+    End Sub
+
+    ''' <summary>当前实例（或缓存）使用的认证服务器地址。</summary>
+    Private Shared Function CurrentAuthServer() As String
+        Return If(McInstanceSelected IsNot Nothing,
+                  Settings.Get(Of String)("VersionServerAuthServer", Instance:=McInstanceSelected),
+                  Settings.Get(Of String)("CacheAuthServerServer")).Trim()
+    End Function
+
+    ''' <summary>一键把当前实例切换为 LittleSkin 外置登录。</summary>
+    Private Sub BtnUseLittleSkin_Click() Handles BtnUseLittleSkin.Click
+        If McInstanceSelected IsNot Nothing Then
+            Settings.Set("VersionServerLogin", 4, Instance:=McInstanceSelected)
+            Settings.Set("VersionServerAuthServer", "https://littleskin.cn/api/yggdrasil", Instance:=McInstanceSelected)
+            Settings.Set("VersionServerAuthRegister", "https://littleskin.cn/auth/register", Instance:=McInstanceSelected)
+            Settings.Set("VersionServerAuthName", "LittleSkin 登录", Instance:=McInstanceSelected)
+        End If
+        Settings.Set("CacheAuthServerServer", "https://littleskin.cn/api/yggdrasil")
+        Settings.Set("CacheAuthServerRegister", "https://littleskin.cn/auth/register")
+        Settings.Set("CacheAuthServerName", "LittleSkin 登录")
+        BtnUseLittleSkin.Visibility = Visibility.Collapsed
+        ReloadRegisterButton()
+        ComboName.Focus()
+        Hint("已切换为 LittleSkin 登录，请输入你的 LittleSkin 邮箱与密码。", HintType.Blue)
     End Sub
 
 End Class

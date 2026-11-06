@@ -1696,9 +1696,10 @@ OnLoaded:
     Public Function McSkinGetAddress(UUID As String, Type As String) As String
         If UUID = "" Then Throw New Exception("UUID 为空。")
         If UUID.StartsWithF("00000") AndAlso Type <> "Auth" Then Throw New Exception("离线 UUID 无正版皮肤文件：" & UUID)
-        '尝试读取缓存
-        Dim CacheSkinAddress As String = ReadIni(PathTemp & "Cache\Skin\Index" & Type & ".ini", UUID)
-        If Not CacheSkinAddress = "" Then Return CacheSkinAddress
+        '尝试读取缓存（带过期时间：换肤后要能刷新，否则会一直显示旧皮肤）
+        Dim CacheFile As String = PathTemp & "Cache\Skin\Index" & Type & ".ini"
+        Dim CacheSkinAddress As String = ReadIni(CacheFile, UUID)
+        If Not CacheSkinAddress = "" AndAlso Not SkinCacheExpired(CacheFile, UUID) Then Return CacheSkinAddress
         '获取皮肤地址
         Dim Url As String
         Select Case Type
@@ -1735,10 +1736,35 @@ OnLoaded:
             Dim SkinUrl As String = SkinJson("textures")("skin")("url").ToString
             SkinValue = If(SkinUrl.Contains("minecraft.net/"), SkinUrl.Replace("http://", "https://"), SkinUrl)
         End If
-        '保存缓存
-        WriteIni(PathTemp & "Cache\Skin\Index" & Type & ".ini", UUID, SkinValue)
+        '保存缓存（同时写入时间戳，供下次判断是否过期）
+        WriteIni(CacheFile, UUID, SkinValue)
+        WriteIni(CacheFile, UUID & "#t", NowUnixSeconds().ToString())
         Logger.Info($"UUID {UUID} 对应的皮肤文件为 {SkinValue}")
         Return SkinValue
+    End Function
+
+    ''' <summary>皮肤地址缓存的有效期（秒）。换肤后最多这么久就会重新拉取。</summary>
+    Private Const SkinCacheExpireSeconds As Integer = 3600
+
+    ''' <summary>当前 UNIX 时间戳（秒）。</summary>
+    Private Function NowUnixSeconds() As Long
+        Return CLng((Date.UtcNow - New Date(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)
+    End Function
+
+    ''' <summary>
+    ''' 皮肤地址缓存是否已过期。没有时间戳的旧缓存一律视为过期，
+    ''' 这样升级到本版后第一次启动就会重新拉一次，把换肤后的新地址写进来。
+    ''' </summary>
+    Private Function SkinCacheExpired(CacheFile As String, UUID As String) As Boolean
+        Try
+            Dim StampText As String = ReadIni(CacheFile, UUID & "#t")
+            If StampText = "" Then Return True
+            Dim Stamp As Long
+            If Not Long.TryParse(StampText, Stamp) Then Return True
+            Return NowUnixSeconds() - Stamp > SkinCacheExpireSeconds
+        Catch
+            Return False
+        End Try
     End Function
 
     Private ReadOnly McSkinDownloadLock As New Object
