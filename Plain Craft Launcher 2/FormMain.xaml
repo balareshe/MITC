@@ -115,14 +115,10 @@
                             <ColumnDefinition Width="1*" />
                         </Grid.ColumnDefinitions>
                         <Path x:Name="ShapeTitleLogo" Data="M6,30 V2 H15 L23,17 L31,2 H40 V30 H32 V12 L24,26 L16,12 V30 Z" SnapsToDevicePixels="False" UseLayoutRounding="False" IsHitTestVisible="False" HorizontalAlignment="Left" Margin="19,15.5,0,15.5" Stretch="fill" Stroke="White" StrokeThickness="2.2" Width="39" />
-                        <Grid x:Name="BorTitleLogo" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="18,0,0,0" IsHitTestVisible="False">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock x:Name="LabTitleBase" Grid.Column="0" Text="PCL" VerticalAlignment="Center" Foreground="White" FontSize="19" FontWeight="SemiBold" IsHitTestVisible="False" SnapsToDevicePixels="False" UseLayoutRounding="False" />
-                            <TextBlock x:Name="LabTitleLogo" Grid.Column="1" Margin="5,0,0,-2" VerticalAlignment="Bottom" Foreground="White" FontSize="13" FontWeight="SemiBold" IsHitTestVisible="False" SnapsToDevicePixels="False" UseLayoutRounding="False" />
-                        </Grid>
+                        <StackPanel x:Name="BorTitleLogo" Orientation="Horizontal" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="18,0,0,0" IsHitTestVisible="False">
+                            <TextBlock x:Name="LabTitleBase" Text="PCL" VerticalAlignment="Center" Foreground="White" FontSize="19" FontWeight="SemiBold" IsHitTestVisible="False" SnapsToDevicePixels="False" UseLayoutRounding="False" />
+                            <TextBlock x:Name="LabTitleLogo" Margin="10,0,0,0" VerticalAlignment="Center" Foreground="White" FontSize="19" FontWeight="SemiBold" IsHitTestVisible="False" SnapsToDevicePixels="False" UseLayoutRounding="False" />
+                        </StackPanel>
                         <local:MyImage x:Name="ImageTitleLogo" SnapsToDevicePixels="False" UseLayoutRounding="False" IsHitTestVisible="False" HorizontalAlignment="Left" Margin="18,0,0,0" Width="26" Height="26" Stretch="Uniform" VerticalAlignment="Center" Visibility="Collapsed" />
                         <StackPanel Grid.Column="1" x:Name="PanTitleSelect" HorizontalAlignment="Left" Height="27" VerticalAlignment="Center" Orientation="Horizontal" Margin="13,0">
                             <local:MyRadioButton x:Name="BtnTitleSelect0" Text="启动" Tag="0" Margin="5,0" Checked="True" Padding="2,0"
