@@ -13,7 +13,7 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyCompany("")>
 <Assembly: AssemblyProduct("PCL MITC")>
 <Assembly: AssemblyCopyright("Copyright © 成都瓜皮龙科技有限公司")>
-<Assembly: AssemblyConfiguration("MITC Config Mark")>
+<Assembly: AssemblyConfiguration("PCL MITC Config Mark")>
 <Assembly: ComVisible(False)>
 
 '若要开始生成可本地化的应用程序，请设置

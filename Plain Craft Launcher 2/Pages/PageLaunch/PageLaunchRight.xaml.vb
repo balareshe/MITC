@@ -25,7 +25,7 @@ Public Class PageLaunchRight
                     RefreshReal()
                 End SyncLock
             Catch ex As Exception
-                Logger.Error(ex, "加载 MITC 主页自定义信息失败", If(ModeDebug, LogBehavior.Alert, LogBehavior.Toast))
+                Logger.Error(ex, "加载 PCL MITC 主页自定义信息失败", If(ModeDebug, LogBehavior.Alert, LogBehavior.Toast))
             End Try
         End Sub)
     End Sub

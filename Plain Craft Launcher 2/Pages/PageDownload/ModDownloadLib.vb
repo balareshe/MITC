@@ -92,7 +92,7 @@
             Else
                 NewItem.Info = Entry("lore").ToString
             End If
-            If Entry("url").ToString.Contains("pcl") Then NewItem.Info = "[MITC 特供下载] " & NewItem.Info
+            If Entry("url").ToString.Contains("pcl") Then NewItem.Info = "[PCL MITC 特供下载] " & NewItem.Info
             AddHandler NewItem.Click, OnClick
             '建立菜单
             If IsSaveOnly Then
@@ -181,7 +181,7 @@
 $"@echo off
 title {Id} 原版服务端
 echo 如果服务端立即停止，请右键编辑该脚本，将下一行开头的 java 替换为适合该 Minecraft 版本的完整 java.exe 的路径。
-echo 你可以在 MITC 的 [设置 → 启动选项] 中查看已安装的 java，所需的 java.exe 一般在其中的 bin 文件夹下。
+echo 你可以在 PCL MITC 的 [设置 → 启动选项] 中查看已安装的 java，所需的 java.exe 一般在其中的 bin 文件夹下。
 echo ------------------------------
 echo 如果提示 ""You need to agree to the EULA in order to run the server""，请打开 eula.txt，按说明阅读并同意 Minecraft EULA 后，将该文件最后一行中的 eula=false 改为 eula=true。
 echo ------------------------------
@@ -1907,7 +1907,7 @@ Retry:
 
         Dim LoaderList As New List(Of LoaderBase)
         '添加忽略标识
-        LoaderList.Add(New LoaderTask(Of Integer, Integer)("添加忽略标识", Sub() FileUtils.Write(VersionFolder & ".pclignore", "用于临时地在 MITC 的版本列表中屏蔽此版本。")) With {.Show = False, .Block = False})
+        LoaderList.Add(New LoaderTask(Of Integer, Integer)("添加忽略标识", Sub() FileUtils.Write(VersionFolder & ".pclignore", "用于临时地在 PCL MITC 的版本列表中屏蔽此版本。")) With {.Show = False, .Block = False})
         'Fabric API
         If Request.FabricApi IsNot Nothing Then
             LoaderList.Add(New LoaderDownload("下载 Fabric API", New List(Of NetFile) From {Request.FabricApi.ToNetFile(ModsTempFolder, ResourceVersion.DownloadReason.Dependency, Request.MinecraftName, ModLoaders.Fabric)}) With {.ProgressWeight = 3, .Block = False})

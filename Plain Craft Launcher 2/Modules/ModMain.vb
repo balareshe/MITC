@@ -593,7 +593,7 @@ EndHint:
                             End Select
                         Next
                     End If
-                    Logger.Info($"已扫描 MITC 文件夹下的帮助文件，目前总计 {FileList.Count} 条")
+                    Logger.Info($"已扫描 PCL MITC 文件夹下的帮助文件，目前总计 {FileList.Count} 条")
                     '读取自带文件
                     For Each File In DirectoryUtils.EnumerateFiles(PathTemp & "Help", True)
                         '跳过非 json 文件与以 . 开头的文件夹

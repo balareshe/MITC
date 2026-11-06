@@ -72,7 +72,7 @@
             '改为隐藏
             Try
                 If Not Settings.Get(Of Boolean)("HintHide") Then
-                    If MyMsgBox("确认要从版本列表中隐藏该版本吗？隐藏该版本后，它将不再出现于 MITC 显示的版本列表中。" & vbCrLf & "此后，在版本列表页面按下 F11 才可以查看被隐藏的版本。", "隐藏版本提示",, "取消") <> 1 Then
+                    If MyMsgBox("确认要从版本列表中隐藏该版本吗？隐藏该版本后，它将不再出现于 PCL MITC 显示的版本列表中。" & vbCrLf & "此后，在版本列表页面按下 F11 才可以查看被隐藏的版本。", "隐藏版本提示",, "取消") <> 1 Then
                         ComboDisplayType.SelectedIndex = 0
                         Return
                     End If
@@ -91,7 +91,7 @@
     Private Sub BtnDisplayDesc_Click(sender As Object, e As EventArgs) Handles BtnDisplayDesc.Click
         Try
             Dim OldInfo As String = ReadIni(PageInstanceLeft.Instance.PathVersion & "PCL\Setup.ini", "CustomInfo")
-            Dim NewInfo As String = MyMsgBoxInput("更改描述", "修改版本的描述文本，留空则使用 MITC 的默认描述。", OldInfo, New ObjectModel.Collection(Of Validate), "默认描述")
+            Dim NewInfo As String = MyMsgBoxInput("更改描述", "修改版本的描述文本，留空则使用 PCL MITC 的默认描述。", OldInfo, New ObjectModel.Collection(Of Validate), "默认描述")
             If NewInfo IsNot Nothing AndAlso OldInfo <> NewInfo Then WriteIni(PageInstanceLeft.Instance.PathVersion & "PCL\Setup.ini", "CustomInfo", NewInfo)
             PageInstanceLeft.Instance = New McInstance(PageInstanceLeft.Instance.Name).Load()
             Reload()

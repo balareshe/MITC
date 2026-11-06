@@ -621,7 +621,7 @@ Friend Module ModSecret
             FileUtils.Delete(Latest)
             NetDownloadByLoader(Obj("url").ToString(), Latest, LoaderToSyncProgress)
         Catch ex As Exception
-            Logger.Error(ex, "下载最新版 MITC 失败")
+            Logger.Error(ex, "下载最新版 PCL MITC 失败")
             Throw
         End Try
     End Sub
@@ -636,7 +636,7 @@ Friend Module ModSecret
     ''' </summary>
     Public ServerConfig As JObject
 
-    Public ServerLoader As New LoaderTask(Of Integer, Integer)("MITC 配置更新", Sub() RefreshServerConfig(), Priority:=ThreadPriority.BelowNormal) With {.ReloadTimeout = 1000 * 60 * 60}
+    Public ServerLoader As New LoaderTask(Of Integer, Integer)("PCL MITC 配置更新", Sub() RefreshServerConfig(), Priority:=ThreadPriority.BelowNormal) With {.ReloadTimeout = 1000 * 60 * 60}
 
     ''' <summary>
     ''' 当前可用的内置节点（已过期的会被排除）。
@@ -1231,7 +1231,7 @@ Friend Module ModSecret
             Dim WA = SystemParameters.WorkArea
             Dim WinW As Double = 486, WinH As Double = 306
             Dim Win As New Window With {
-                .Title = "MITC 授权验证",
+                .Title = "PCL MITC 授权验证",
                 .Width = WinW,
                 .Height = WinH,
                 .ResizeMode = ResizeMode.NoResize,
@@ -1348,7 +1348,7 @@ Friend Module ModSecret
         Catch ex As Exception
             Logger.Error(ex, "显示授权窗口失败，改用系统输入框")
             Try
-                Dim Typed As String = NormalizeLicenseKey(Microsoft.VisualBasic.InputBox("请输入授权码：", "MITC 授权验证", Initial))
+                Dim Typed As String = NormalizeLicenseKey(Microsoft.VisualBasic.InputBox("请输入授权码：", "PCL MITC 授权验证", Initial))
                 If Typed Is Nothing OrElse Typed.Trim() = "" Then Return False
                 Dim Msg As String = ""
                 If LicenseVerify(Typed, Msg) = 1 Then

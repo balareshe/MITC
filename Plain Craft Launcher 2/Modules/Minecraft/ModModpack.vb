@@ -75,7 +75,7 @@ Public Module ModModpack
                 If ex.GetDisplay(True).Contains("Error.WinIOError") Then
                     Throw New Exception("打开整合包文件失败", ex)
                 ElseIf File.EndsWithF(".rar", True) Then
-                    Throw New Exception("MITC 无法处理 rar 格式的压缩包，请在解压后重新压缩为 zip 格式再试", ex)
+                    Throw New Exception("PCL MITC 无法处理 rar 格式的压缩包，请在解压后重新压缩为 zip 格式再试", ex)
                 Else
                     Throw New Exception("打开整合包文件失败，文件可能损坏或为不支持的压缩包格式", ex)
                 End If
@@ -738,7 +738,7 @@ Retry:
         Next
         If Not Addons.ContainsKey("game") Then Throw New Exception("该 MCBBS 整合包未提供游戏版本信息，无法安装！")
         If Addons.ContainsKey("quilt") Then
-            Hint("MITC 暂不支持安装需要 Quilt 的整合包！", HintType.Red)
+            Hint("PCL MITC 暂不支持安装需要 Quilt 的整合包！", HintType.Red)
             Throw New OperationCanceledException
         End If
         Dim Request As New McInstallRequest With {
@@ -794,7 +794,7 @@ Retry:
                     Logger.Info($"文件 {ExeFile} 的产品名标识为 {Info.ProductName}")
                     If Info.ProductName = "Plain Craft Launcher" Then
                         Launcher = ExeFile
-                        Logger.Info($"发现整合包附带的 MITC 启动器：{ExeFile}")
+                        Logger.Info($"发现整合包附带的 PCL MITC 启动器：{ExeFile}")
                     ElseIf (Info.ProductName.ContainsIgnoreCase("Launcher") OrElse Info.ProductName.Contains("启动")) AndAlso
                         Not Info.ProductName = "Plain Craft Launcher Admin Manager" Then
                         If Launcher Is Nothing Then

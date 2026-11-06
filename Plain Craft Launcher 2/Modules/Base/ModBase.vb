@@ -6,16 +6,16 @@ Public Module ModBase
 #Region "声明"
 
     '下列版本信息由更新器自动修改
-    Public Const VersionBaseName As String = "2.13.0.1.497" '显示用版本名：上游基线 + 本修改版构建号
+    Public Const VersionBaseName As String = "2.13.0.1.498" '显示用版本名：上游基线 + 本修改版构建号
     Public Const CommitHash As String = "" 'Commit Hash，由 GitHub Workflow 自动替换
     'VersionCode 跟随本修改版自己的发布节奏递增：
     '  每次发布 +1；新增功能或较大改动可 +2 ~ +5。
     '  VersionBaseName 是显示用版本名，形如 2.13.0.1.<versionCode>：
     '  前缀保留上游基线，后缀是本修改版自己的构建号，两者需同步修改。
 #If RELEASE Then
-    Public Const VersionCode As Integer = 497 '正式版
+    Public Const VersionCode As Integer = 498 '正式版
 #Else
-    Public Const VersionCode As Integer = 498 '快照版
+    Public Const VersionCode As Integer = 499 '快照版
 #End If
 
     '版本信息
@@ -638,7 +638,7 @@ Public Module ModBase
             FileUtils.Delete(TestFilePath)
             Return True
         Catch ex As Exception
-            Logger.Warn(ex, $"没有对文件夹 {Folder} 的权限，请尝试以管理员权限运行 MITC")
+            Logger.Warn(ex, $"没有对文件夹 {Folder} 的权限，请尝试以管理员权限运行 PCL MITC")
             Return False
         End Try
     End Function
@@ -1051,7 +1051,7 @@ Public Module ModBase
         Catch ex As Exception
             Logger.Warn(ex, $"无法打开网页（{Url}）")
             ClipboardSet(Url, False)
-            MyMsgBox("可能由于浏览器未正确配置，MITC 无法为你打开网页。" & vbCrLf & "网址已经复制到剪贴板，若有需要可以手动粘贴访问。" & vbCrLf &
+            MyMsgBox("可能由于浏览器未正确配置，PCL MITC 无法为你打开网页。" & vbCrLf & "网址已经复制到剪贴板，若有需要可以手动粘贴访问。" & vbCrLf &
                      $"网址：{Url}", "无法打开网页")
         End Try
     End Sub

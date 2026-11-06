@@ -71,7 +71,7 @@
                     End If
                 Next
             Catch ex As Exception
-                Logger.Warn(ex, "扫描 MITC 所在文件夹中是否有 MC 文件夹失败")
+                Logger.Warn(ex, "扫描 PCL MITC 所在文件夹中是否有 MC 文件夹失败")
             End Try
 
             '扫描官启文件夹
@@ -149,15 +149,15 @@
             Dim ResultJson As String =
 "{
     ""profiles"":  {
-        ""MITC"": {
+        ""PCL MITC"": {
             ""icon"": ""Grass"",
-            ""name"": ""MITC"",
+            ""name"": ""PCL MITC"",
             ""lastVersionId"": ""latest-release"",
             ""type"": ""latest-release"",
             ""lastUsed"": """ & Date.Now.ToString("yyyy'-'MM'-'dd") & "T" & Date.Now.ToString("HH':'mm':'ss") & ".0000Z""
         }
     },
-    ""selectedProfile"": ""MITC"",
+    ""selectedProfile"": ""PCL MITC"",
     ""clientToken"": ""23323323323323323323323323323333""
 }"
             FileUtils.Write(Folder & "launcher_profiles.json", ResultJson, encoding:=Encoding.GetEncoding("GB18030"))
@@ -432,7 +432,7 @@
                     End If
                     '无法获取
                     _Version.VanillaName = "Unknown"
-                    Info = "MITC 无法识别该版本的 MC 版本号"
+                    Info = "PCL MITC 无法识别该版本的 MC 版本号"
                 Catch ex As Exception
                     Logger.Warn(ex, "识别 Minecraft 版本时出错")
                     _Version.VanillaName = "Unknown"

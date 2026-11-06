@@ -240,7 +240,7 @@ Extracted:
                                     LogMc += Line & vbLf
                                 ElseIf Line.Contains("以下为游戏输出的最后一段内容") Then
                                     HasLauncherMark = True
-                                    Logger.Info("找到 MITC 输出的游戏实时日志头")
+                                    Logger.Info("找到 PCL MITC 输出的游戏实时日志头")
                                 End If
                             Next
                             '导入后 500 行
@@ -930,7 +930,7 @@ NextStack:
         '没有结果的处理
         If Not CrashReasons.Any() Then
             If IsHandAnalyze Then
-                Return "很抱歉，MITC 无法确定错误原因。"
+                Return "很抱歉，PCL MITC 无法确定错误原因。"
             Else
                 Return $"很抱歉，你的游戏出现了一些问题……{vbCrLf}如果要寻求帮助，请把错误报告文件发给对方，而不是发送这个窗口的照片或者截图。"
             End If
@@ -954,7 +954,7 @@ NextStack:
                 Case CrashReason.Java版本过高
                     Results.Add("游戏似乎因为你所使用的 Java 版本过高而崩溃了。\n请在版本设置的 Java 选项中改用较低版本的 Java，然后再启动游戏。\n如果没有，可以从网络中下载、安装一个。")
                 Case CrashReason.Java版本不兼容
-                    Results.Add("游戏不兼容你当前使用的 Java。\n请在版本设置的 Java 选项中改用合适版本的 Java，然后再启动游戏。\n如果你没有安装任何 Mod 并且因此崩溃，请向 MITC 提交反馈。")
+                    Results.Add("游戏不兼容你当前使用的 Java。\n请在版本设置的 Java 选项中改用合适版本的 Java，然后再启动游戏。\n如果你没有安装任何 Mod 并且因此崩溃，请向 PCL MITC 提交反馈。")
                 Case CrashReason.Mod名称包含特殊字符
                     Results.Add("由于有 Mod 的名称包含特殊字符，导致游戏崩溃。\n请尝试修改 Mod 文件名，让它只包含英文字母、数字、减号（-）、下划线（_）和小数点，然后再启动游戏。")
                 Case CrashReason.MixinBootstrap缺失
@@ -973,15 +973,15 @@ NextStack:
                     End If
                 Case CrashReason.堆栈分析发现关键字
                     If Additional.IsSingle Then
-                        Results.Add("你的游戏遇到了一些问题，MITC 为此找到了一个可疑的关键词：" & Additional.First & "。\n\n如果你知道某个关键词对应的 Mod，那么有可能就是它引起的错误，你也可以查看错误报告获取详情。\h")
+                        Results.Add("你的游戏遇到了一些问题，PCL MITC 为此找到了一个可疑的关键词：" & Additional.First & "。\n\n如果你知道某个关键词对应的 Mod，那么有可能就是它引起的错误，你也可以查看错误报告获取详情。\h")
                     Else
-                        Results.Add("你的游戏遇到了一些问题，MITC 为此找到了以下可疑的关键词：\n - " & Additional.Join(", ") & "\n\n如果你知道某个关键词对应的 Mod，那么有可能就是它引起的错误，你也可以查看错误报告获取详情。\h")
+                        Results.Add("你的游戏遇到了一些问题，PCL MITC 为此找到了以下可疑的关键词：\n - " & Additional.Join(", ") & "\n\n如果你知道某个关键词对应的 Mod，那么有可能就是它引起的错误，你也可以查看错误报告获取详情。\h")
                     End If
                 Case CrashReason.堆栈分析发现Mod名称, CrashReason.怀疑Mod导致游戏崩溃
                     If Additional.IsSingle Then
-                        Results.Add("MITC 怀疑名为 " & Additional.First & " 的 Mod 导致了游戏出错，但不能完全确定。\n你可以尝试禁用此 Mod，然后观察游戏是否还会崩溃。\n\e\h")
+                        Results.Add("PCL MITC 怀疑名为 " & Additional.First & " 的 Mod 导致了游戏出错，但不能完全确定。\n你可以尝试禁用此 Mod，然后观察游戏是否还会崩溃。\n\e\h")
                     Else
-                        Results.Add("MITC 怀疑以下 Mod 导致了游戏出错，但不能完全确定：\n - " & Additional.Join("\n - ") & "\n\n你可以尝试依次禁用上述 Mod，然后观察游戏是否还会崩溃。\n\e\h")
+                        Results.Add("PCL MITC 怀疑以下 Mod 导致了游戏出错，但不能完全确定：\n - " & Additional.Join("\n - ") & "\n\n你可以尝试依次禁用上述 Mod，然后观察游戏是否还会崩溃。\n\e\h")
                     End If
                 Case CrashReason.确定Mod导致游戏崩溃
                     If Additional.IsSingle Then
@@ -1053,7 +1053,7 @@ NextStack:
                     Results.Add("你所使用的 OptiFine 可能导致了你的游戏出现问题。\n\n该问题只在特定 OptiFine 版本中出现，你可以尝试更换 OptiFine 的版本。\h")
                 Case CrashReason.显卡驱动不支持导致无法设置像素格式, CrashReason.Intel驱动不兼容导致EXCEPTION_ACCESS_VIOLATION, CrashReason.AMD驱动不兼容导致EXCEPTION_ACCESS_VIOLATION, CrashReason.Nvidia驱动不兼容导致EXCEPTION_ACCESS_VIOLATION, CrashReason.显卡不支持OpenGL
                     If LogAll.Contains("hd graphics ") Then
-                        Results.Add("你的显卡驱动存在问题，或未使用独立显卡，导致游戏无法正常运行。\n\n如果你的电脑存在独立显卡，请使用独立显卡而非 Intel 核显启动 MITC 与 Minecraft。\n如果问题依然存在，请尝试升级你的显卡驱动到最新版本，或回退到出厂版本。\n如果还是不行，还可以尝试使用 8.0.51 或更低版本的 Java。\h")
+                        Results.Add("你的显卡驱动存在问题，或未使用独立显卡，导致游戏无法正常运行。\n\n如果你的电脑存在独立显卡，请使用独立显卡而非 Intel 核显启动 PCL MITC 与 Minecraft。\n如果问题依然存在，请尝试升级你的显卡驱动到最新版本，或回退到出厂版本。\n如果还是不行，还可以尝试使用 8.0.51 或更低版本的 Java。\h")
                     Else
                         Results.Add("你的显卡驱动存在问题，导致游戏无法正常运行。\n\n请尝试升级你的显卡驱动到最新版本，或回退到出厂版本，然后再启动游戏。\n如果还是不行，可以尝试使用 8.0.51 或更低版本的 Java。\n如果问题依然存在，那么你可能需要换个更好的显卡……\h")
                     End If
@@ -1100,9 +1100,9 @@ NextStack:
                         Results.Add("Forge 可能已经提供了错误信息，请根据错误报告中的日志信息进行对应处理，如果看不懂英文可以使用翻译软件。\h")
                     End If
                 Case CrashReason.没有可用的分析文件
-                    Results.Add("你的游戏出现了一些问题，但 MITC 未能找到相关记录文件，因此无法进行分析。\h")
+                    Results.Add("你的游戏出现了一些问题，但 PCL MITC 未能找到相关记录文件，因此无法进行分析。\h")
                 Case Else
-                    Results.Add("MITC 获取到了没有详细信息的错误原因（" & CrashReasons.First.Key & "），请向 PCL 作者提交反馈以获取详情。\h")
+                    Results.Add("PCL MITC 获取到了没有详细信息的错误原因（" & CrashReasons.First.Key & "），请向 PCL 作者提交反馈以获取详情。\h")
             End Select
         Next
 

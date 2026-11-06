@@ -46,7 +46,7 @@ Public Class PageInstanceExport
     End Sub
 
 #Region "子选项"
-    Private SubOptionBlackList As String() = {"Quark Programmer Art.zip", "+ EuphoriaPatches_", "MITC Skin.zip"}
+    Private SubOptionBlackList As String() = {"Quark Programmer Art.zip", "+ EuphoriaPatches_", "PCL2 Skin.zip"}
 
     ''' <summary>
     ''' 动态生成子文件夹下的选项，例如资源包、存档等。
@@ -319,10 +319,10 @@ Public Class PageInstanceExport
             ConfigLines.Add($"# 当版本设置中选择了 {vbLQ}使用版本文件夹中的 Java{vbRQ} 时，是否打包版本文件夹中的 Java。")
             ConfigLines.Add("IncludeJava:" & CheckOptionsJava.Checked)
             ConfigLines.Add("")
-            ConfigLines.Add("# 是否打包正式版 MITC，以便没有启动器的玩家安装整合包。")
+            ConfigLines.Add("# 是否打包正式版 PCL MITC，以便没有启动器的玩家安装整合包。")
             ConfigLines.Add("IncludeLauncher:" & CheckOptionsPcl.Checked)
             ConfigLines.Add("")
-            ConfigLines.Add("# 是否打包 MITC 个性化内容，例如功能隐藏设置、主页、背景音乐和图片等。")
+            ConfigLines.Add("# 是否打包 PCL MITC 个性化内容，例如功能隐藏设置、主页、背景音乐和图片等。")
             ConfigLines.Add("IncludeLauncherCustom:" & CheckOptionsPclCustom.Checked)
             ConfigLines.Add("")
             ConfigLines.Add("# 是否将 Mod、资源包、光影包的文件直接放入整合包中，这样在导入时就无需联网下载它们。")
@@ -459,10 +459,10 @@ Public Class PageInstanceExport
         '构造步骤加载器
         Dim Loaders As New List(Of LoaderBase)
 
-#Region "准备 MITC 文件"
+#Region "准备 PCL MITC 文件"
 
         If BuildType <> BuildTypes.Release AndAlso IncludePCL Then
-            Loaders.Add(New LoaderTask(Of Integer, Integer)("下载 MITC 正式版",
+            Loaders.Add(New LoaderTask(Of Integer, Integer)("下载 PCL MITC 正式版",
             Sub(Loader As LoaderTask(Of Integer, Integer))
                 DownloadLatestPCL(Loader)
                 FileUtils.Copy(PathTemp & "Latest.exe", CacheFolder & "Plain Craft Launcher.exe")

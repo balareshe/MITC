@@ -142,7 +142,7 @@
                         <local:MyComboBoxItem Content="关闭所有公告" />
                     </local:MyComboBox>
                     <TextBlock Grid.Row="4" VerticalAlignment="Center" HorizontalAlignment="Left" Text="缓存文件夹" Margin="0,0,25,0" />
-                    <local:MyTextBox x:Name="TextSystemCache" Grid.Row="4" Grid.ColumnSpan="2" local:SettingService.Key="SystemSystemCache" Grid.Column="1" ToolTip="MITC 的下载、皮肤等缓存文件的存储位置。&#xa;不推荐路径中带有空格。&#xa;留空即为默认值，重启 MITC 后生效。" HintText="默认">
+                    <local:MyTextBox x:Name="TextSystemCache" Grid.Row="4" Grid.ColumnSpan="2" local:SettingService.Key="SystemSystemCache" Grid.Column="1" ToolTip="PCL MITC 的下载、皮肤等缓存文件的存储位置。&#xa;不推荐路径中带有空格。&#xa;留空即为默认值，重启 PCL MITC 后生效。" HintText="默认">
                         <local:MyTextBox.ValidateRules>
                             <local:ValidateNullable />
                             <local:ValidateFolderPath UseMinecraftCharCheck="False" />
@@ -150,7 +150,7 @@
                     </local:MyTextBox>
                     <local:MyCheckBox Margin="0,5,0,4" Text="匿名数据收集" Grid.Row="6" Height="22" Grid.ColumnSpan="2"
                         x:Name="CheckSystemTelemetry" local:SettingService.Key="SystemSystemTelemetry" 
-                        ToolTip="MITC 不会上传任何使用数据：遥测上报地址在本构建中是空的，即使这里开着也不会发送任何内容。&#xa;本机日志与崩溃信息只留在你自己电脑上。&#13;MITC 不会上传或收集任何个人信息，包括上报的东西里面也没有！&#xa;详情：https://github.com/Meloong-Git/PCL/discussions/7036" />
+                        ToolTip="PCL MITC 不会上传任何使用数据：遥测上报地址在本构建中是空的，即使这里开着也不会发送任何内容。&#xa;本机日志与崩溃信息只留在你自己电脑上。&#13;PCL MITC 不会上传或收集任何个人信息，包括上报的东西里面也没有！&#xa;详情：https://github.com/Meloong-Git/PCL/discussions/7036" />
                     <Grid Height="35" Grid.Row="7" Grid.ColumnSpan="5" Margin="0,12,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="Button" />

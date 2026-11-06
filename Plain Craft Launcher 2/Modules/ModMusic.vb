@@ -313,16 +313,16 @@ Public Module ModMusic
         Catch ex As Exception
             Logger.Warn(ex, $"播放音乐出现内部错误（{MusicCurrent}）")
             If TypeOf ex Is NAudio.MmException AndAlso ex.Message.Contains("AlreadyAllocated") Then
-                Hint("你的音频设备正被其他程序占用。请在关闭占用的程序后重启 MITC，才能恢复音乐播放功能！", HintType.Red)
+                Hint("你的音频设备正被其他程序占用。请在关闭占用的程序后重启 PCL MITC，才能恢复音乐播放功能！", HintType.Red)
                 Thread.Sleep(1000000000)
             End If
             If TypeOf ex Is NAudio.MmException AndAlso (ex.Message.Contains("NoDriver") OrElse ex.Message.Contains("BadDeviceId")) Then
-                Hint("由于音频设备变更，音乐播放功能在重启 MITC 后才能恢复！", HintType.Red)
+                Hint("由于音频设备变更，音乐播放功能在重启 PCL MITC 后才能恢复！", HintType.Red)
                 Thread.Sleep(1000000000)
             End If
             If Not (MusicCurrent.EndsWithF(".wav", True) OrElse MusicCurrent.EndsWithF(".mp3", True) OrElse MusicCurrent.EndsWithF(".flac", True)) OrElse
                 ex.Message.Contains("0xC00D36C4") Then '#5096：不支持给定的 URL 的字节流类型。 (异常来自 HRESULT:0xC00D36C4)
-                Hint("播放音乐失败（" & PathUtils.GetLastPart(MusicCurrent) & "）：MITC 可能不支持此音乐格式，请将格式转换为 .wav、.mp3 或 .flac 后再试", HintType.Red)
+                Hint("播放音乐失败（" & PathUtils.GetLastPart(MusicCurrent) & "）：PCL MITC 可能不支持此音乐格式，请将格式转换为 .wav、.mp3 或 .flac 后再试", HintType.Red)
             Else
                 Logger.Error(ex, $"播放音乐失败（{PathUtils.GetLastPart(MusicCurrent)}）", LogBehavior.Toast)
             End If

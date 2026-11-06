@@ -226,18 +226,18 @@ Public Class PageLinkMain
                 Code(NET_PREFIX.Length - 1) = "-"c AndAlso Code(NET_PREFIX.Length + 5) = "-"c AndAlso
                 Code(CODE_NAME_LEN) = "-"c AndAlso Code(CODE_NAME_LEN + 6) = "-"c) Then
             If Code.StartsWithF("U/") Then 'HMCL
-                Return "请让房主使用 MITC 创建房间！"
+                Return "请让房主使用 PCL MITC 创建房间！"
             ElseIf Code.Length = 10 Then 'PCL CE
-                Return "请让房主使用非社区版的 MITC 创建房间！"
+                Return "请让房主使用非社区版的 PCL MITC 创建房间！"
             ElseIf Code.Length = 23 AndAlso Code(0) = "P"c AndAlso Code(11) = "-"c Then
                 '旧格式（没有前缀）
-                Return $"这是旧版邀请码。请双方都升级到最新版 MITC 后再联机——新版房间名带 {NET_PREFIX} 前缀，中继只给这种房间转发。"
+                Return $"这是旧版邀请码。请双方都升级到最新版 PCL MITC 后再联机——新版房间名带 {NET_PREFIX} 前缀，中继只给这种房间转发。"
             Else
-                Return "邀请码有误，请让房主使用 MITC 创建房间！"
+                Return "邀请码有误，请让房主使用 PCL MITC 创建房间！"
             End If
         End If
         '校验版本
-        If Val(Code.Substring(CODE_NAME_LEN + 7, 2)) > INVITE_CODE_VERSION Then Return "你的 MITC 版本太老了，请在更新 MITC 之后再联机！"
+        If Val(Code.Substring(CODE_NAME_LEN + 7, 2)) > INVITE_CODE_VERSION Then Return "你的 PCL MITC 版本太老了，请在更新 PCL MITC 之后再联机！"
         Return Nothing
     End Function
     Private Shared Function FixCodeFormat(Code As String) As String
@@ -427,7 +427,7 @@ Public Class PageLinkMain
 
     '复制邀请码
     Private Sub Copy() Handles BtnFinishCopy.Click
-        Dim CodeText As String = $"在 MITC 启动器中输入邀请码【{GetInviteCode()}】，即可加入联机房间！"
+        Dim CodeText As String = $"在 PCL MITC 启动器中输入邀请码【{GetInviteCode()}】，即可加入联机房间！"
         ClipboardSet(CodeText, False)
         Settings.Set("LinkLastAutoJoinInviteCode", CodeText)
         Hint("已复制邀请码！", HintType.Green)
@@ -531,7 +531,7 @@ Public Class PageLinkMain
         If Not String.IsNullOrEmpty(DisableReason) Then Throw New Exception("$" & DisableReason) 'TODO: 可能不会显示错误原因？
         If CType(ServerConfig("Link"), JObject).ContainsKey("MinVersionCode") AndAlso
            VersionCode < ServerConfig("Link")("MinVersionCode").ToObject(Of Integer) Then
-            Throw New Exception("$你的 MITC 版本太老了，请在更新 MITC 之后再联机！")
+            Throw New Exception("$你的 PCL MITC 版本太老了，请在更新 PCL MITC 之后再联机！")
         End If
         '提前校验中继节点：避免用户先白等约 30 MB 的联机模块下载，
         '下载完才被告知必须去填节点地址。
@@ -1611,7 +1611,7 @@ ForcedPass:
             Try
                 Static BroadcastSocket As New Socket(SocketType.Dgram, ProtocolType.Udp)
                 BroadcastSocket.SendTo(
-                    Encoding.UTF8.GetBytes($"[MOTD]MITC 联机房间[/MOTD][AD]{ClientPort}[/AD]"),
+                    Encoding.UTF8.GetBytes($"[MOTD]PCL MITC 联机房间[/MOTD][AD]{ClientPort}[/AD]"),
                     SocketFlags.None,
                     New IPEndPoint(IPAddress.Loopback, 4445))
             Catch ex As Exception
