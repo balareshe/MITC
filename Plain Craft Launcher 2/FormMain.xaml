@@ -121,7 +121,7 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <TextBlock x:Name="LabTitleBase" Grid.Column="0" Text="PCL" VerticalAlignment="Center" Foreground="White" FontSize="19" FontWeight="SemiBold" IsHitTestVisible="False" SnapsToDevicePixels="False" UseLayoutRounding="False" />
-                            <TextBlock x:Name="LabTitleLogo" Grid.Column="1" Margin="6,0,0,-4" VerticalAlignment="Bottom" Foreground="White" FontSize="19" FontWeight="SemiBold" IsHitTestVisible="False" SnapsToDevicePixels="False" UseLayoutRounding="False" />
+                            <TextBlock x:Name="LabTitleLogo" Grid.Column="1" Margin="5,0,0,-2" VerticalAlignment="Bottom" Foreground="White" FontSize="13" FontWeight="SemiBold" IsHitTestVisible="False" SnapsToDevicePixels="False" UseLayoutRounding="False" />
                         </Grid>
                         <local:MyImage x:Name="ImageTitleLogo" SnapsToDevicePixels="False" UseLayoutRounding="False" IsHitTestVisible="False" HorizontalAlignment="Left" Margin="18,0,0,0" Width="26" Height="26" Stretch="Uniform" VerticalAlignment="Center" Visibility="Collapsed" />
                         <StackPanel Grid.Column="1" x:Name="PanTitleSelect" HorizontalAlignment="Left" Height="27" VerticalAlignment="Center" Orientation="Horizontal" Margin="13,0">
