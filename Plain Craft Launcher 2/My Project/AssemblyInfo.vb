@@ -8,10 +8,10 @@ Imports System.Runtime.InteropServices
 
 '查看程序集特性的值
 
-<Assembly: AssemblyTitle("MITC 启动器")>
+<Assembly: AssemblyTitle("PCL MITC")>
 <Assembly: AssemblyDescription("Minecraft 启动器")>
 <Assembly: AssemblyCompany("")>
-<Assembly: AssemblyProduct("MITC")>
+<Assembly: AssemblyProduct("PCL MITC")>
 <Assembly: AssemblyCopyright("Copyright © 成都瓜皮龙科技有限公司")>
 <Assembly: AssemblyConfiguration("MITC Config Mark")>
 <Assembly: ComVisible(False)>

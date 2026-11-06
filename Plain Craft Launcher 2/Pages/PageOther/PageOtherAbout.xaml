@@ -23,7 +23,7 @@
                     <local:MyButton Text="赞助 PCL !" Grid.Column="2" Grid.Row="0" Height="35" Padding="13,0" ColorType="Highlight"
                         local:CustomEventService.EventType="打开网页"
                         local:CustomEventService.EventData="https://meloong.com/afd/a/LTCat" />
-                    <local:MyListItem IsHitTestVisible="False" Title="MITC" Margin="-5,0,15,0" Info="基于 Plain Craft Launcher 2 · 当前版本：%VERSION%（%VERSIONCODE%.%BRANCH%）" Grid.Row="1" Grid.Column="1" x:Name="ItemAboutPcl" />
+                    <local:MyListItem IsHitTestVisible="False" Title="PCL MITC" Margin="-5,0,15,0" Info="基于 Plain Craft Launcher 2 · 当前版本：%VERSION%（%VERSIONCODE%.%BRANCH%）" Grid.Row="1" Grid.Column="1" x:Name="ItemAboutPcl" />
                     <local:MyButton Text="查看源代码" Grid.Column="2" Grid.Row="1" Height="35" MinWidth="120" Padding="13,0"
                         local:CustomEventService.EventType="打开网页"
                         local:CustomEventService.EventData="https://github.com/balareshe/MITC" />

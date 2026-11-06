@@ -250,7 +250,7 @@
                         <local:MyCheckBox x:Name="CheckOptionsPcl">
                             <local:MyCheckBox.Tag>
                                 <local:ExportOption 
-                                Title="MITC 启动器程序"
+                                Title="PCL MITC 启动器程序"
                                 Description="打包正式版 MITC，以便没有启动器的玩家安装整合包"
                                 DefaultChecked="True" />
                             </local:MyCheckBox.Tag>
@@ -260,7 +260,7 @@
                             <local:MyCheckBox x:Name="CheckOptionsPclCustom">
                                 <local:MyCheckBox.Tag>
                                     <local:ExportOption 
-                                Title="MITC 个性化内容"
+                                Title="PCL MITC 个性化内容"
                                 Description="功能隐藏设置、主页、背景音乐和图片等"
                                 DefaultChecked="True" />
                                 </local:MyCheckBox.Tag>
