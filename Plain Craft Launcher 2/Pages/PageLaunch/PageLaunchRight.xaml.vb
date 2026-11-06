@@ -60,9 +60,6 @@ Public Class PageLaunchRight
                                     EventType=""刷新主页"" EventData=""/""
                                     Logo=""M512.0 838.3c-80.2 0-153.4-29.3-210.2-77.4l75.5-75.5c11.5-11.5 25.8-22.0 25.8-37.0a27.2 27.2 0 0 0-27.1-27.1H104.0c-27.1 0-27.1 23.9-27.1 27.1v271.9a27.1 27.1 0 0 0 27.1 27.1c15.0 0 27.8-16.6 42.5-31.2l77.9-77.9c76.6 67.7 177.1 108.9 287.4 108.9 221.7 0 404.5-166.0 431.2-380.6h-109.8c-25.9 154.2-159.7 271.9-321.3 271.9zM919.9 76.6c-15.0 0-27.8 16.6-42.5 31.3L799.5 185.8c-76.5-67.7-177.1-108.9-287.4-108.9-221.8 0-404.5 166.1-431.3 380.6H190.6c25.9-154.2 159.7-271.9 321.4-271.9 80.2 0 153.4 29.3 210.1 77.4l-75.5 75.5c-11.6 11.5-25.8 22.0-25.8 37.1a27.2 27.2 0 0 0 27.1 27.1h271.9c27.1 0 27.1-23.9 27.1-27.1V103.8a27.1 27.1 0 0 0-27.1-27.1z"" />
                             </local:MyCard>"
-                    Case 2
-                        Logger.Info("主页预设：Minecraft 新闻")
-                        Url = "https://mcnews.meloong.com"
                     Case 3
                         Logger.Info("主页预设：简单主页")
                         Url = "https://pclhomeplazaoss.lingyunawa.top:26994/d/Homepages/MFn233/Custom.xaml"
@@ -72,9 +69,6 @@ Public Class PageLaunchRight
                     Case 5
                         Logger.Info("主页预设：Minecraft 皮肤推荐")
                         Url = "https://forgepixel.com/pcl_sub_file"
-                    Case 6
-                        Logger.Info("主页预设：OpenBMCLAPI 仪表盘 Lite")
-                        Url = "https://pcl-bmcl.milu.ink/"
                     Case 7
                         Logger.Info("主页预设：主页市场")
                         Url = "https://pclhomeplazaoss.lingyunawa.top:26994/p/Homepages/Homepage.Market/Custom.xaml"
@@ -82,23 +76,17 @@ Public Class PageLaunchRight
                         Logger.Info("主页预设：更新日志")
                         Url = "https://pclhomeplazaoss.lingyunawa.top:26994/d/Homepages/Joker2184/UpdateHomepage.xaml"
                     Case 9
-                        Logger.Info("主页预设：MITC 新功能说明书")
+                        Logger.Info("主页预设：PCL 新功能说明书")
                         Url = "https://raw.gitcode.com/WForst-Breeze/WhatsNewPCL/raw/main/Custom.xaml"
                     Case 10
                         Logger.Info("主页预设：OpenMCIM Dashboard")
                         Url = "https://files.mcimirror.top/PCL"
-                    Case 11
-                        Logger.Info("主页预设：杂志主页")
-                        Url = "http://118.195.192.193:26995/d/magazine-homepage-pcl/Custom.xaml"
                     Case 12
-                        Logger.Info("主页预设：MITC GitHub 仪表盘")
+                        Logger.Info("主页预设：PCL GitHub 仪表盘")
                         Url = "https://ddf.pcl-community.top/Custom.xaml"
                     Case 13
-                        Logger.Info("主页预设：MITC 更新摘要")
+                        Logger.Info("主页预设：Minecraft 更新摘要")
                         Url = "https://raw.gitcode.com/ENC_Euphony/PCL-AI-Summary-HomePage/raw/master/Custom.xaml"
-                    Case 14
-                        Logger.Info("主页预设：今日新闻热点")
-                        Url = "https://pcl.wyc-w.top/index.xaml"
                     Case 15
                         Logger.Info("主页预设：Minecraft 芝士站")
                         Url = "https://www.xxag.top/mkss"
@@ -108,6 +96,9 @@ Public Class PageLaunchRight
                     Case 17
                         Logger.Info("Bangumi 番剧主页")
                         Url = "https://bangumi.p.kaphia.qzz.io"
+                    Case Else
+                        '旧配置里可能还存着已下线的预设编号，回退成空主页而不是去请求死地址
+                        Logger.Info($"主页预设已下线（{Settings.Get(Of Integer)("UiCustomPreset")}），回退到空主页")
                 End Select
         End Select
         '联网下载

@@ -90,10 +90,10 @@
                             <local:MyComboBoxItem local:SettingService.Value="5" Content="左上 (保持长宽比)" />
                             <local:MyComboBoxItem local:SettingService.Value="9" Content="左中 (保持长宽比)" />
                             <local:MyComboBoxItem local:SettingService.Value="7" Content="左下 (保持长宽比)" />
-                            <local:MyComboBoxItem local:SettingService.Value="11" Content="中上 (保持长宽比)" />
-                            <local:MyComboBoxItem local:SettingService.Value="2" Content="居中 (保持长宽比)" />
+                        <local:MyComboBoxItem local:SettingService.Value="11" Content="中上 (保持长宽比)" />
+                        <local:MyComboBoxItem local:SettingService.Value="2" Content="居中 (保持长宽比)" />
                             <local:MyComboBoxItem local:SettingService.Value="12" Content="中下 (保持长宽比)" />
-                            <local:MyComboBoxItem local:SettingService.Value="6" Content="右上 (保持长宽比)" />
+                        <local:MyComboBoxItem local:SettingService.Value="6" Content="右上 (保持长宽比)" />
                             <local:MyComboBoxItem local:SettingService.Value="10" Content="右中 (保持长宽比)" />
                             <local:MyComboBoxItem local:SettingService.Value="8" Content="右下 (保持长宽比)" />
                         </local:MyComboBox>
@@ -241,19 +241,15 @@
                         <local:MyComboBox local:SettingService.Key="UiCustomPreset" Grid.ColumnSpan="2" Grid.Column="1">
                             <local:MyComboBoxItem local:SettingService.Value="0" Content="你知道吗？" />
                             <local:MyComboBoxItem local:SettingService.Value="1" Content="回声洞" />
-                            <local:MyComboBoxItem local:SettingService.Value="2" Content="Minecraft 新闻（作者：最亮的信标）" />
                             <!--<local:MyComboBoxItem local:SettingService.Value="3" Content="简单主页（作者：MFn233）" />-->
                             <local:MyComboBoxItem local:SettingService.Value="4" Content="每日整合包推荐（作者：wkea）" />
                             <local:MyComboBoxItem local:SettingService.Value="5" Content="Minecraft 皮肤推荐（作者：wkea）" />
-                            <local:MyComboBoxItem local:SettingService.Value="6" Content="OpenBMCLAPI 仪表盘 Lite（作者：Silverteal、Mxmilu666）" />
                             <!--<local:MyComboBoxItem local:SettingService.Value="7" Content="PCL 主页市场（作者：凌云）" />-->
                             <!--<local:MyComboBoxItem local:SettingService.Value="8" Content="PCL 新闻速报（作者：Joker2184）" />-->
                             <local:MyComboBoxItem local:SettingService.Value="9" Content="PCL 新功能说明书（作者：WForst-Breeze）" />
                             <!--<local:MyComboBoxItem local:SettingService.Value="10" Content="OpenMCIM 仪表盘（作者：SALTWOOD）" />-->
-                            <local:MyComboBoxItem local:SettingService.Value="11" Content="杂志主页（作者：CreeperIsASpy）" />
                             <local:MyComboBoxItem local:SettingService.Value="12" Content="PCL GitHub 仪表盘（作者：Deep-Dark-Forest）" />
                             <local:MyComboBoxItem local:SettingService.Value="13" Content="Minecraft 更新摘要（作者：pynickle）" />
-                            <local:MyComboBoxItem local:SettingService.Value="14" Content="今日新闻热点（作者：EYicheng）" />
                             <local:MyComboBoxItem local:SettingService.Value="15" Content="Minecraft 芝士站（作者：awaEric233）" />
                             <local:MyComboBoxItem local:SettingService.Value="16" Content="整合包推荐引擎（作者：CHMYGZ）" />
                             <local:MyComboBoxItem local:SettingService.Value="17" Content="Bangumi 番剧主页（作者：wzyaeu）" />
@@ -295,8 +291,6 @@
                         <TextBlock Grid.Row="3" VerticalAlignment="Center" HorizontalAlignment="Left" Text="更多 子页面" />
                         <local:MyCheckBox Height="22" VerticalAlignment="Center" Grid.Row="3" Grid.Column="2" Text="帮助" x:Name="CheckHiddenOtherHelp" local:SettingService.Key="UiHiddenOtherHelp" />
                         <local:MyCheckBox Height="22" VerticalAlignment="Center" Grid.Row="3" Grid.Column="3" Text="关于与鸣谢" x:Name="CheckHiddenOtherAbout" local:SettingService.Key="UiHiddenOtherAbout" />
-                        <local:MyCheckBox Height="22" VerticalAlignment="Center" Grid.Row="3" Grid.Column="4" Text="反馈" x:Name="CheckHiddenOtherFeedback" local:SettingService.Key="UiHiddenOtherFeedback" />
-                        <local:MyCheckBox Height="22" VerticalAlignment="Center" Grid.Row="3" Grid.Column="5" Text="新功能投票" x:Name="CheckHiddenOtherVote" local:SettingService.Key="UiHiddenOtherVote" />
                         <TextBlock Grid.Row="4" VerticalAlignment="Center" HorizontalAlignment="Left" Text="特定功能" />
                         <local:MyCheckBox Height="22" VerticalAlignment="Center" Grid.Row="4" Grid.Column="2" Text="邮箱隐藏" x:Name="CheckLauncherEmail" local:SettingService.Key="UiLauncherEmail" ToolTip="隐藏第三方登录的账号邮箱显示，以避免隐私泄露。&#xa;此选项的更改将在重启启动器后生效。" />
                         <local:MyCheckBox Height="22" VerticalAlignment="Center" Grid.Row="4" Grid.Column="3" Text="版本管理" x:Name="CheckHiddenFunctionSelect" local:SettingService.Key="UiHiddenFunctionSelect" ToolTip="隐藏启动按钮下方的版本选择与版本设置入口。" />
